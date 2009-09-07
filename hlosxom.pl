@@ -513,6 +513,16 @@ for my $prop (qw( entries_dir file_extension depth use_cache use_index ))  {
     };
 }
 
+sub entry_path {
+    my ( $self, $path ) = @_;
+
+    $path =~ s{/+}{/}g;
+    $path =~ s{^/*}{};
+    $path =~ s{/*$}{};
+
+    return $path;
+}
+
 sub create {
     my ( $self, %args ) = @_;
 
@@ -526,6 +536,7 @@ sub update {
     my ( $self, %args ) = @_;
 
     my $path = delete $args{'path'} or Carp::croak "Argument 'path' is not specified.";
+       $path = $self->entry_path($path);
        $path = "${path}." . $self->file_extension;
     my $file = $self->entries_dir->file( $path );
     my $source = $self->build( %args );
@@ -545,8 +556,7 @@ sub select {
     my ( $self, %args ) = @_;
 
     my $path = delete $args{'path'} or Carp::croak "Argument 'path' is not specified.";
-       $path =~ s{/+}{/}g;
-       $path =~ s{^/*}{};
+       $path = $self->entry_path($path);
 
     my $file = $self->entries_dir->file( "${path}." . $self->file_extension );
 
@@ -581,14 +591,28 @@ sub select {
     return ();
 }
 
-sub remove {}
+sub remove {
+    my ( $self, %args ) = @_;
+
+    my $path = delete $args{'path'} or Carp::croak "Argument 'path' is not specified.";
+       $path = $self->entry_path($path);
+
+    if ( $self->exists( path => $path ) ) {
+        my $file = $self->entries_dir->file( "${path}." . $self->file_extension );
+        return $file->remove();
+    }
+    else {
+        Carp::carp "${path} does not exists.";
+        return;
+    }
+
+}
 
 sub exists {
     my ( $self, %args ) = @_;
 
     my $path = delete $args{'path'} or Carp::croak "Argument 'path' is not specified.";
-       $path =~ s{/+}{/}g;
-       $path =~ s{^/*}{};
+       $path = $self->entry_path($path);
        $path = "${path}." . $self->file_extension;
 
     my $depth       = $self->depth;

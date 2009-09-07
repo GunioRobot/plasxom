@@ -9,7 +9,7 @@ use File::Temp;
 use Test::More
     tests => 1 + 3 + 2 + 2 + 1 + 1 + 1 
            + 2 + 3 + 7
-           + 1 + 2;
+           + 1 + 2 + 1 + 2;
 
 BEGIN { require_hlosxom }
 
@@ -207,6 +207,7 @@ is_deeply(
     );
 }
 
+# update, create, update in select, remove test
 {
     my $temp = File::Temp->newdir;
 
@@ -264,4 +265,24 @@ is_deeply(
         . qq{body}
     );
 
+    # create
+    $db->create( path => 'bar/baz', %entry );
+
+    is_deeply(
+        { $db->select( path => 'bar/baz' ) },
+        {
+            title           => 'title',
+            body_source     => 'body',
+            summary_source  => 'description',
+            pagename        => 'foobarbaz',
+            tags            => [qw( foo bar baz )],
+            meta            => { foo => 'bar', bar => 'baz' },
+            created         => stat($db->entries_dir->file('bar/baz.txt'))->mtime,
+            lastmod         => stat($db->entries_dir->file('bar/baz.txt'))->mtime,
+        }
+    );
+
+    # remove
+    ok( $db->remove( path => 'foo' ) );
+    ok( ! $db->exists( path => 'foo' ) );
 }
