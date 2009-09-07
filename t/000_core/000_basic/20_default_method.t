@@ -4,13 +4,17 @@ use strict;
 use warnings;
 
 use t::Util qw( require_hlosxom $example );
-use Test::More tests => 1 + 3 + 2 ;
+use Test::More tests => 2 + 3 + 2 ;
 
 require_hlosxom;
 
 # default config
 
 isa_ok( hlosxom->config, 'hlosxom::hash' );
+
+# default vars
+
+isa_ok( hlosxom->vars, 'hlosxom::hash' );
 
 # default method 'template';
 

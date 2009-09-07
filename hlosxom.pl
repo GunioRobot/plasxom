@@ -35,7 +35,7 @@ for my $method ( qw( template interpolate ) ) {
 
 __PACKAGE__->config( hlosxom::hash->new() );
 
-__PACKAGE__->vars({});
+__PACKAGE__->vars( hlosxom::hash->new() );
 
 __PACKAGE__->methods({
     template    => sub {
@@ -75,6 +75,7 @@ sub setup {
     my ( $class ) = @_;
 
     $class->setup_config;
+    $class->setyp_vars;
     $class->setup_cache;
     $class->setup_plugins;
     $class->setup_methods;
@@ -92,6 +93,14 @@ sub setup_config {
     die "Configuration value is not HASH reference: $conf"  if ( ref $conf ne 'HASH' );
 
     $class->config->merge( %{ $conf } );
+}
+
+sub setup_vars {
+    my ( $class ) = @_;
+
+    my $vars = $class->config->{'vars'} || {};
+
+    $class->vars->merge( %{ $vars } );
 }
 
 sub setup_cache {
