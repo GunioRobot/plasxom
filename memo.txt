@@ -1,0 +1,24 @@
+my $db = hlosxom::entries::blosxom->new(
+    entries_dir     => '/path/to/dir',
+    file_extension  => 'txt',
+    depth           => 0,
+
+    meta_prefix         => qr{\@},
+    meta_mapping        => {
+        created         => 'date',
+        pagename        => 'page',
+        tags            => 'category',
+        summary_source  => 'description',
+    },
+    meta_date_parser    => \&parser,
+    meta_date_formatter => \&formatter,
+    meta_tag_parser     => \&tagparser,
+    meta_tag_formatter  => \&tagformatter,
+
+    use_cache           => 1,
+    index_file          => '/path/to/entries.index',
+);
+
+$dh->index();
+
+$db->index( path => '/path/to/category' );

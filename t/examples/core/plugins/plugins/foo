@@ -1,0 +1,23 @@
+package hlosxom::plugin::foo;
+
+use strict;
+use warnings;
+
+sub new {
+    my $class = shift;
+    bless { @_ }, $class;
+}
+
+sub setup { 1 }
+
+sub start { 1 }
+
+sub foo {
+    my ( $self, $context, @args ) = @_;
+    return [ $context, @args ];
+}
+
+sub template    { sub {} }
+sub interpolate { sub {} }
+
+1;

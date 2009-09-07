@@ -1,0 +1,17 @@
+package hlosxom::plugin::baz;
+
+use strict;
+use warnings;
+
+sub new {
+    my $class = shift;
+    bless { @_ }, $class;
+}
+
+sub setup { 1 }
+
+sub start { 0 }
+
+sub foo { [qw( bar baz )] }
+
+1;

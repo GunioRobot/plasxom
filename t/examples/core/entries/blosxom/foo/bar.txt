@@ -1,0 +1,8 @@
+title
+@summary: description
+@pagename: foopage
+@foo: bar
+@tags: foo, bar, baz
+@bar: baz
+@date: 2009-01-01T00:00:00+09:00
+body

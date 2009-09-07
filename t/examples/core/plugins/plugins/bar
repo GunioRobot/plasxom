@@ -1,0 +1,15 @@
+package hlosxom::plugin::bar;
+
+use strict;
+use warnings;
+
+sub new {
+    my $class = shift;
+    bless { @_ }, $class;
+}
+
+sub setup { 0 }
+
+sub start { 1 }
+
+1;
