@@ -8,8 +8,8 @@ use Test::More tests => 2;
 
 require_hlosxom;
 
-my $config = hlosxom::config->new( foo => 'bar' );
+my $config = hlosxom::hash->new( foo => 'bar' );
 
-isa_ok( $config, 'hlosxom::config' );
+isa_ok( $config, 'hlosxom::hash' );
 
 is_deeply( $config, { foo => 'bar' } );

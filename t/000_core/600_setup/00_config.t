@@ -8,7 +8,7 @@ use Test::More tests => 1;
 
 require_hlosxom;
 
-hlosxom->config( hlosxom::config->new( foo => 'bar' ) );
+hlosxom->config( hlosxom::hash->new( foo => 'bar' ) );
 
 local $ENV{'HLOSXOM_CONFIG'} = $example->file('core/setup/config/config.pl');
 

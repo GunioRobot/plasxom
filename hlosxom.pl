@@ -33,7 +33,7 @@ for my $method ( qw( template interpolate ) ) {
     };
 }
 
-__PACKAGE__->config( hlosxom::config->new() );
+__PACKAGE__->config( hlosxom::hash->new() );
 
 __PACKAGE__->vars({});
 
@@ -91,7 +91,7 @@ sub setup_config {
     die "Failed to load configuration file: $file: $@"      if ( $@ );
     die "Configuration value is not HASH reference: $conf"  if ( ref $conf ne 'HASH' );
 
-    $class->config->merge_config( %{ $conf } );
+    $class->config->merge( %{ $conf } );
 }
 
 sub setup_cache {
@@ -152,14 +152,14 @@ sub setup_entries {
 
 1;
 
-package hlosxom::config;
+package hlosxom::hash;
 
 sub new {
     my $class = shift;
     return bless { @_ }, $class;
 }
 
-sub merge_config {
+sub merge {
     my ( $self, %new ) = @_;
     my %base = %{ $self };
     my $new = hlosxom::util::merge_hash( \%base, \%new );

@@ -8,7 +8,7 @@ use Test::More tests => 2;
 
 require_hlosxom;
 
-hlosxom->config->merge_config(
+hlosxom->config->merge(
     plugin  => {
         plugin_dir          => $example->subdir('core/plugins/plugins'),
         plugin_state_dir    => $example->subdir('core/plugins/states'),

@@ -8,7 +8,7 @@ use Test::More tests => 2;
 
 require_hlosxom;
 
-hlosxom->config( hlosxom::config->new( cache => {} ) );
+hlosxom->config( hlosxom::hash->new( cache => {} ) );
 
 hlosxom->setup_cache;
 

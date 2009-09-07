@@ -8,14 +8,14 @@ use Test::More tests => 2;
 
 require_hlosxom;
 
-my $config = hlosxom::config->new(
+my $config = hlosxom::hash->new(
     foo => 'AAA',
     bar => {
         baz => 'BBB',
     },
 );
 
-$config->merge_config(
+$config->merge(
     bar => {
         baz => 'CCC',
         foo => 'BBB',
@@ -33,4 +33,4 @@ is_deeply(
     },
 );
 
-isa_ok( $config, 'hlosxom::config' );
+isa_ok( $config, 'hlosxom::hash' );

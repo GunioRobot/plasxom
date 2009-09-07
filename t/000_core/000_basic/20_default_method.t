@@ -10,13 +10,13 @@ require_hlosxom;
 
 # default config
 
-isa_ok( hlosxom->config, 'hlosxom::config' );
+isa_ok( hlosxom->config, 'hlosxom::hash' );
 
 # default method 'template';
 
 my $dir = $example->subdir('core/basic/template')->absolute->cleanup;
 
-hlosxom->config->merge_config(
+hlosxom->config->merge(
     flavour => {
         dir => $dir,
     },
