@@ -489,6 +489,57 @@ sub entry {
     }
 }
 
+sub entries {
+    my ( $self, %args ) = @_;
+
+    my $path = delete $args{'path'} || q{};
+    my $page = delete $args{'page'} || 1;
+    my $sort = delete $args{'sort'} || 'created';
+
+    Carp::croak "Argument 'page' is not number" if ( $page !~ m{^\d+$} );
+    Carp::croak "Argument 'sort' is not CODE reference or hlosxom::entry property name" if ( ref $sort && ! ref $sort eq 'CODE' );
+    Carp::croak "Argument 'sort' is not hlosxom::entry property" if ( ! ref $sort && ! hlosxom::entry->can($sort) );
+
+    my $index = $self->index;
+    my %new   = ();
+
+    # filter path
+    $path =~ s{/+}{/}g;
+    $path =~ s{^/*}{};
+
+    for my $fn ( sort keys %{ $index } ) {
+        if ( $fn =~ m{^$path} ) {
+            $new{$fn} = $index->{$fn};
+        }
+    }
+
+    # sort
+    my @sorted = sort {
+        if ( ref $sort eq 'CODE' ) {
+            return $sort->( $a, $b );
+        }
+        else {
+            $b->$sort cmp $a->$sort;
+        }
+    } map { $new{$_} } sort keys %new;
+
+    # paginate
+    my $num     = $self->num_entries;
+    my $max     = scalar( @sorted ) - 1;
+    my $form    = $num * ( $page - 1 );
+    my $to      = $form + ( $num - 1 );
+
+    if ( $form > $max ) {
+        return ();
+    }
+
+    if ( $to > $max ) {
+        $to = $max;
+    }
+
+    return @sorted[ $form .. $to ];
+}
+
 1;
 
 package hlosxom::entries::base;
