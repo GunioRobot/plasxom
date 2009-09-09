@@ -418,6 +418,28 @@ sub indexed {
     }
 }
 
+sub index {
+    my ( $self ) = @_;
+    return $self->{'index'} if ( $self->indexed );
+
+    my %index = ();
+    my %entries = $self->db->index();
+
+    for my $path ( keys %entries ) {
+        my $entry = hlosxom::entry->new(
+            db      => $self->db,
+            path    => $path,
+            %{ $entries{$path} },
+        );
+        $index{$path} = $entry;
+    }
+
+    $self->{'index'} = \%index;
+    $self->indexed(1);
+
+    return $self->{'index'};
+}
+
 1;
 
 package hlosxom::entries::base;
