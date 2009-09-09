@@ -391,13 +391,19 @@ sub new {
     my ( $class, %args ) = @_;
 
     my $schema = delete $args{'schema'} or Carp::croak "Argument 'schema' is not specified.";
-    my %config = %args;
+    my $num    = delete $args{'num_entries'} || 5;
 
+    my %config = %args;
     my $db = $schema->new( %config );
+
+    Carp::croak "Argument 'num_entries' is not number" if ( $num !~ m{^\d+$} );
 
     my $self = bless {
         db      => $db,
         index   => {},
+        config  => {
+            num_entries => $num,
+        },
         flag    => {
             indexed => 0,
         },
@@ -415,6 +421,19 @@ sub indexed {
     }
     else {
         return $self->{'flag'}->{'indexed'};
+    }
+}
+
+sub num_entries {
+    my $self = shift;
+
+    if ( @_ ) {
+        my $num = shift @_;
+        Carp::croak "Argument is not number" if ( $num !~ m{^\d+$} );
+        $self->{'config'}->{'num_entries'} = $num;
+    }
+    else {
+        return $self->{'config'}->{'num_entries'};
     }
 }
 

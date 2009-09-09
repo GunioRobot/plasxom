@@ -4,7 +4,7 @@ use strict;
 use warnings;
 
 use t::Util qw( require_hlosxom );
-use Test::More tests => 5;
+use Test::More tests => 8;
 
 require_hlosxom;
 
@@ -18,8 +18,8 @@ require_hlosxom;
 }
 
 my $entries = hlosxom::entries->new(
-    schema => 'TestEntries',
-    foo     => 'bar',
+    schema      => 'TestEntries',
+    foo         => 'bar',
 );
 
 isa_ok( $entries, 'hlosxom::entries' );
@@ -35,3 +35,17 @@ ok( ! $entries->indexed );
 $entries->indexed(1);
 
 ok( $entries->indexed );
+
+is( $entries->num_entries, 5 );
+
+$entries = hlosxom::entries->new(
+    schema => 'TestEntries',
+    foo    => 'bar',
+    num_entries => 10,
+);
+
+is( $entries->num_entries, 10 );
+
+$entries->num_entries(20);
+
+is( $entries->num_entries, 20 );
