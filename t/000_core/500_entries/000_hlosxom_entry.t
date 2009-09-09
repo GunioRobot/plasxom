@@ -31,6 +31,7 @@ plan tests =>
     + 5 + ( (scalar(@props) + 2) * 2)           # clear test
     + 2 + 1                                     # commit test
     + 2 + 2 + ( scalar(@props) * 2 )            # reload test
+    + 3                                         # path bug fix
     ;
 
 {
@@ -80,6 +81,7 @@ plan tests =>
 my $entry = hlosxom::entry->new(
     path => '/path/to/entry',
     db   => 'TestLoader',
+    title => 'foobarbaz',
 );
 
 # path
@@ -88,7 +90,7 @@ is( $entry->filename,       'entry'                 );
 is( $entry->fullpath,       '/path/to/entry'        );
 
 # default property
-is_deeply( $entry->{'property'}, {} );
+is_deeply( $entry->{'property'}, { title => 'foobarbaz' } );
 
 # default flag
 is( $entry->loaded, 0 );
@@ -161,3 +163,15 @@ $entry->reload;
 for my $prop ( @props ) {
     is_deeply( $entry->$prop, $entry{$prop} );
 }
+
+# path bug fix
+
+$entry = hlosxom::entry->new(
+    path    => 'foo',
+    db      => 'TestLoader',
+);
+
+is( $entry->path,           q{}     );
+is( $entry->filename,       'foo'   );
+is( $entry->fullpath,       'foo'   );
+

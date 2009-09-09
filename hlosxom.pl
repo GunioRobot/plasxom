@@ -447,6 +447,22 @@ sub exists {
     return $self->db->exists( path => $path );
 }
 
+sub entry {
+    my ( $self, %args ) = @_;
+    my $path = delete $args{'path'} or Carp::croak "Argument 'path' is not specified.";
+
+    if ( $self->exists( path => $path ) && ref( my $entry = $self->index->{$path} ) eq 'hlosxom::entry' ) {
+        return $entry;
+    }
+    else {
+        return hlosxom::entry->new(
+            path    => $path,
+            db      => $self->db,
+            created => time(),
+        );
+    }
+}
+
 1;
 
 package hlosxom::entries::base;
@@ -873,10 +889,9 @@ sub new {
     my $db       = delete $args{'db'}   or Carp::croak "Argument 'db' is not specified.";
 
     my ( $path, $fn );
-
     if ( $fullpath =~ m{^(?:(.*)/)?(.+)$} ) {
-        $path           = $1;
-        $fn             = $2;
+        $path           = $1 || q{};
+        $fn             = $2 || q{};
     }
     else {
         Carp::croak "Invalid path: ${fullpath}";
@@ -887,7 +902,7 @@ sub new {
             path            => $path,
             filename        => $fn,
         },
-        property    => {},
+        property    => { %args },
         flag        => {
             loaded => 0,
         },
@@ -1012,7 +1027,9 @@ sub fullpath {
     my $path    = $self->path;
     my $fn      = $self->filename;
 
-    return "${path}/${fn}";
+       $path    &&= "${path}/";
+
+    return "${path}${fn}";
 }
 
 sub load {
@@ -1034,9 +1051,6 @@ sub load {
         }
 
         $self->loaded( 1 );
-    }
-    else {
-        Carp::croak "${path} is not exists.";
     }
 }
 
