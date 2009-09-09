@@ -12,7 +12,7 @@ use Carp ();
 our $VERSION = '0.01';
 
 my %stash = ();
-for my $property ( qw( config plugins methods vars cache ) ) {
+for my $property ( qw( config plugins methods vars cache entries entries_schema_class ) ) {
     no strict 'refs';
     *{$property} = sub {
         my $class = shift;
@@ -70,6 +70,8 @@ __PACKAGE__->methods({
         return $ret;
     },
 });
+
+__PACKAGE__->entries_schema_class('hlosxom::entries::blosxom');
 
 sub setup {
     my ( $class ) = @_;
@@ -148,12 +150,16 @@ sub setup_methods {
 sub setup_entries {
     my ( $class ) = @_;
 
-    my $entries_class   = $class->entries_schema_class || 'hlosxom::entries::blosxom';
-    my $entries_config  = $class->config->{'entries'} || {};
+    my $schema = $class->entries_schema_class || 'hlosxom::entries::blosxom';
+    my $config = $class->config->{'entries'} || {};
+
+    if ( exists $config->{'use_cache'} && !! $config->{'use_cache'} ) {
+        $config->{'cache'} = $class->cache;
+    }
 
     my $entries = hlosxom::entries->new(
-        schema => $entries_class,
-        %{ $entries_config },
+        schema => $schema,
+        %{ $config },
     );
 
     $class->entries( $entries );

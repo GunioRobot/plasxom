@@ -4,7 +4,7 @@ use strict;
 use warnings;
 
 use t::Util qw( require_hlosxom $example );
-use Test::More tests => 2 + 3 + 2 ;
+use Test::More tests => 2 + 1 + 3 + 2 ;
 
 require_hlosxom;
 
@@ -15,6 +15,10 @@ isa_ok( hlosxom->config, 'hlosxom::hash' );
 # default vars
 
 isa_ok( hlosxom->vars, 'hlosxom::hash' );
+
+# default entries schema class;
+
+is( hlosxom->entries_schema_class, 'hlosxom::entries::blosxom' );
 
 # default method 'template';
 
