@@ -440,6 +440,13 @@ sub index {
     return $self->{'index'};
 }
 
+sub exists {
+    my ( $self, %args ) = @_;
+    my $path = delete $args{'path'} or Carp::croak "Argument 'path' is not specified.";
+
+    return $self->db->exists( path => $path );
+}
+
 1;
 
 package hlosxom::entries::base;
