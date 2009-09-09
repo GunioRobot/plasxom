@@ -395,12 +395,28 @@ sub new {
 
     my $db = $schema->new( %config );
 
-    my $self = bless { db => $db }, $class;
+    my $self = bless {
+        db      => $db,
+        index   => {},
+        flag    => {
+            indexed => 0,
+        },
+    }, $class;
     return $self;
 }
 
 sub db { $_[0]->{'db'} }
 
+sub indexed {
+    my $self = shift;
+
+    if ( @_ ) {
+        $self->{'flag'}->{'indexed'} = shift @_;
+    }
+    else {
+        return $self->{'flag'}->{'indexed'};
+    }
+}
 
 1;
 
