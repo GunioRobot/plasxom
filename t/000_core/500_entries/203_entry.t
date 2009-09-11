@@ -24,6 +24,9 @@ is_deeply(
     hlosxom::entry->new(
         path    => 'foo',
         db      => $entries->db,
+        pagename    => 'foopage',
+        tags        => [qw( foo bar baz )],
+        meta        => { foo => 'bar', bar => 'baz' },
         created => 1230735600,
         lastmod => stat( $datadir->file('foo.txt') )->mtime,
     ),

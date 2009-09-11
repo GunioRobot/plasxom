@@ -27,12 +27,18 @@ my $index = {
     'foo' => hlosxom::entry->new(
         db => $entries->db,
         path => 'foo',
+        pagename    => 'foopage',
+        tags        => [qw( foo bar baz )],
+        meta        => { foo => 'bar', bar => 'baz' },
         created => 1230735600,
         lastmod => stat( $datadir->file('foo.txt') )->mtime,
     ),
     'foo/bar' => hlosxom::entry->new(
         db => $entries->db,
         path => 'foo/bar',
+        pagename    => 'foopage',
+        tags        => [qw( foo bar baz )],
+        meta        => { foo => 'bar', bar => 'baz' },
         created => 1230735600,
         lastmod => stat( $datadir->file('foo/bar.txt') )->mtime,
     ),

@@ -119,6 +119,9 @@ is_deeply(
     { $db->index },
     {
         'foo'       => {
+            pagename    => 'foopage',
+            tags        => [qw( foo bar baz )],
+            meta        => { foo => 'bar', bar => 'baz' },
             created => 1230735600,
             lastmod => stat( $datadir->file('foo.txt') )->mtime,
         },
@@ -175,12 +178,18 @@ is_deeply(
         { $db->index() },
         {
             'foo'       => {
-                created => 1230735600,
-                lastmod => stat( $datadir->file('foo.txt') )->mtime,
+                pagename    => 'foopage',
+                tags        => [qw( foo bar baz )],
+                meta        => { foo => 'bar', bar => 'baz' },
+                created     => 1230735600,
+                lastmod     => stat( $datadir->file('foo.txt') )->mtime,
             },
             'foo/bar'   => {
-                created => 1230735600,
-                lastmod => stat( $datadir->file('foo/bar.txt') )->mtime,
+                pagename    => 'foopage',
+                tags        => [qw( foo bar baz )],
+                meta        => { foo => 'bar', bar => 'baz' },
+                created     => 1230735600,
+                lastmod     => stat( $datadir->file('foo/bar.txt') )->mtime,
             },
         },
     );
@@ -190,26 +199,39 @@ is_deeply(
         $data,
         {
             'foo'       => {
-                created => 1230735600,
-                lastmod => stat( $datadir->file('foo.txt') )->mtime,
+                pagename    => 'foopage',
+                tags        => [qw( foo bar baz )],
+                meta        => { foo => 'bar', bar => 'baz' },
+                created     => 1230735600,
+                lastmod     => stat( $datadir->file('foo.txt') )->mtime,
             },
             'foo/bar'   => {
-                created => 1230735600,
-                lastmod => stat( $datadir->file('foo/bar.txt') )->mtime,
+                pagename    => 'foopage',
+                tags        => [qw( foo bar baz )],
+                meta        => { foo => 'bar', bar => 'baz' },
+                created     => 1230735600,
+                lastmod     => stat( $datadir->file('foo/bar.txt') )->mtime,
             },
-        }
+        },
+
     );
 
     is_deeply(
         { $db->index() },
         {
             'foo'       => {
-                created => 1230735600,
-                lastmod => stat( $datadir->file('foo.txt') )->mtime,
+                pagename    => 'foopage',
+                tags        => [qw( foo bar baz )],
+                meta        => { foo => 'bar', bar => 'baz' },
+                created     => 1230735600,
+                lastmod     => stat( $datadir->file('foo.txt') )->mtime,
             },
             'foo/bar'   => {
-                created => 1230735600,
-                lastmod => stat( $datadir->file('foo/bar.txt') )->mtime,
+                pagename    => 'foopage',
+                tags        => [qw( foo bar baz )],
+                meta        => { foo => 'bar', bar => 'baz' },
+                created     => 1230735600,
+                lastmod     => stat( $datadir->file('foo/bar.txt') )->mtime,
             },
         },
     );

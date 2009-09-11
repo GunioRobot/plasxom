@@ -820,9 +820,13 @@ sub index  {
 
             my $mtime = File::stat::stat($file)->mtime;
             if ( ! exists $index{$path} || $index{$path}->{'lastmod'} != $mtime  ) {
+                my %data = $self->select( path => $path );
+                delete $data{'title'};
+                delete $data{'body_source'};
+                delete $data{'summary_source'};
                 $index{$path} = {
+                    %data,
                     lastmod => $mtime,
-                    created => { $self->select( path => $path ) }->{'created'},
                 };
             }
         },
