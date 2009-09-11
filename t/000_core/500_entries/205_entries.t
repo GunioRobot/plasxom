@@ -4,7 +4,7 @@ use strict;
 use warnings;
 
 use t::Util qw( require_hlosxom $example );
-use Test::More tests => 5;
+use Test::More tests => 6;
 
 require_hlosxom;
 
@@ -26,6 +26,11 @@ is_deeply(
     [ $entries->entries( path => 'foo/' ) ],
     [ $bar ],
 );
+
+is_deeply(
+    [ $entries->entries( pagename => 'foopage' ) ],
+    [ $foo, $bar ],
+),
 
 # sort test
 is_deeply(

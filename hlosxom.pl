@@ -492,9 +492,10 @@ sub entry {
 sub entries {
     my ( $self, %args ) = @_;
 
-    my $path = delete $args{'path'} || q{};
-    my $page = delete $args{'page'} || 1;
-    my $sort = delete $args{'sort'} || 'created';
+    my $path        = delete $args{'path'}      || q{};
+    my $pagename    = delete $args{'pagename'}  || q{};
+    my $page        = delete $args{'page'}      || 1;
+    my $sort        = delete $args{'sort'}      || 'created' ;
 
     Carp::croak "Argument 'page' is not number" if ( $page !~ m{^\d+$} );
     Carp::croak "Argument 'sort' is not CODE reference or hlosxom::entry property name" if ( ref $sort && ! ref $sort eq 'CODE' );
@@ -503,13 +504,22 @@ sub entries {
     my $index = $self->index;
     my %new   = ();
 
-    # filter path
+    # filter path or filter pagename
     $path =~ s{/+}{/}g;
     $path =~ s{^/*}{};
 
-    for my $fn ( sort keys %{ $index } ) {
-        if ( $fn =~ m{^$path} ) {
-            $new{$fn} = $index->{$fn};
+    if ( !! $pagename ) {
+        for my $fn ( sort keys %{ $index } ) {
+            if ( $index->{$fn}->pagename eq $pagename ) {
+                $new{$fn} = $index->{$fn};
+            }
+        }
+    }
+    else {
+        for my $fn ( sort keys %{ $index } ) {
+            if ( $fn =~ m{^$path} ) {
+                $new{$fn} = $index->{$fn};
+            }
         }
     }
 
