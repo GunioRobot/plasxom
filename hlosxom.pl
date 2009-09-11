@@ -1008,6 +1008,18 @@ for my $prop (qw( epoch year month shortmonth fullmonth day hour minute second d
     *{$prop} = sub { return $_[0]->{$prop} };
 }
 
+sub ymd {
+    my ( $self ) = @_;
+    my ( $yr, $mo, $da ) = @{ $self }{qw( year month day )};
+    return "${yr}-${mo}-${da}";
+}
+
+sub time {
+    my ( $self ) = @_;
+    my ( $hr, $min, $sec ) = @{ $self }{qw( hour minute second )};
+    return "${hr}:${min}:${sec}";
+}
+
 1;
 
 package hlosxom::entry;
