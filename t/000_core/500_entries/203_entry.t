@@ -22,13 +22,14 @@ my $entries = hlosxom::entries->new(
 is_deeply(
     $entries->entry( path => 'foo' ),
     hlosxom::entry->new(
-        path    => 'foo',
-        db      => $entries->db,
+        path        => 'foo',
+        db          => $entries->db,
         pagename    => 'foopage',
         tags        => [qw( foo bar baz )],
         meta        => { foo => 'bar', bar => 'baz' },
-        created => 1230735600,
-        lastmod => stat( $datadir->file('foo.txt') )->mtime,
+        datesection => 1,
+        created     => 1230735600,
+        lastmod     => stat( $datadir->file('foo.txt') )->mtime,
     ),
 );
 
