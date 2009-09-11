@@ -962,6 +962,54 @@ sub build {
 
 1;
 
+package hlosxom::date;
+
+use Carp ();
+use Time::localtime ();
+
+our %month2num = (  nil => '00', Jan => '01', Feb => '02', Mar => '03',
+                    Apr => '04', May => '05', Jun => '06', Jul => '07',
+                    Aug => '08', Sep => '09', Oct => '10', Nov => '11', Dec => '12' );
+
+our @num2month = sort { $month2num{$a} <=> $month2num{$b} } keys %month2num;
+
+our @fullmonth = qw( nil January February March April May June July
+                     August September October November December );
+
+sub new {
+    my ( $class, %args ) = @_;
+
+    my $epoch = delete $args{'epoch'} or Carp::croak "Argument 'epoch' is not specified.";
+
+    my $ctime = Time::localtime::ctime($epoch);
+    my ( $dw, $mo, $da, $hr, $min, $sec, $yr )
+        = ( $ctime =~ m{(\w{3})[ ]+(\w{3})[ ]+(\d{1,2})[ ]+(\d{2}):(\d{2}):(\d{2})[ ]+(\d{4})$} );
+    $da = sprintf('%02d', $da);
+    my $mo_num = $month2num{$mo};
+
+    my $self = bless {
+        epoch       => $epoch,
+        year        => $yr,
+        month       => $mo_num,
+        shortmonth  => $mo,
+        fullmonth   => $fullmonth[$mo_num],
+        day         => $da,
+        hour        => $hr,
+        minute      => $min,
+        second      => $sec,
+        dayweek     => $dw,
+    }, $class;
+
+    return $self;
+}
+
+for my $prop (qw( epoch year month shortmonth fullmonth day hour minute second dayweek )) {
+    no strict 'refs';
+    *{$prop} = sub { return $_[0]->{$prop} };
+}
+
+1;
+
 package hlosxom::entry;
 
 use Carp ();
