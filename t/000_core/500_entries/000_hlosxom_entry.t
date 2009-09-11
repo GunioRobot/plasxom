@@ -14,7 +14,7 @@ our %entry = (
     summary_source  => 'summary',
     pagename        => 'foo',
     permalink       => 'http://localhost/foo/bar',
-    created         => 0,
+    created         => 1,
     lastmod         => 1,
     tags            => [qw( foo bar baz )],
     meta            => {},
@@ -27,7 +27,7 @@ plan tests =>
     + 1                                         # default property
     + 1                                         # default flag
     + 1                                         # database
-    + 2 + 1 + (scalar(@props) * 5) + ( 2 * 6 )  # property test
+    + 2 + 2 + (scalar(@props) * 5) + ( 2 * 6 )  # property test
     + 5 + ( (scalar(@props) + 2) * 2)           # clear test
     + 2 + 1                                     # commit test
     + 2 + 2 + ( scalar(@props) * 2 )            # reload test
@@ -104,6 +104,8 @@ $entry->load;
 
 is( $entry->loaded, 1 );
 
+isa_ok( $entry->date, 'hlosxom::date' );
+
 for my $prop ( @props ) {
     is_deeply( $entry->$prop, $entry{$prop} );
     $entry->$prop('foo');
@@ -175,4 +177,3 @@ $entry = hlosxom::entry->new(
 is( $entry->path,           q{}     );
 is( $entry->filename,       'foo'   );
 is( $entry->fullpath,       'foo'   );
-

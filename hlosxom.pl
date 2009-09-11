@@ -1156,6 +1156,11 @@ for my $flag (qw( loaded )) {
     };
 }
 
+sub date {
+    my ( $self ) = @_;
+    return hlosxom::date->new( epoch => $self->created, );
+}
+
 for my $prop (qw( path filename )) {
     no strict 'refs';
     *{$prop} = sub {
