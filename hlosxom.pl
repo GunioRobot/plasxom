@@ -996,7 +996,20 @@ sub new {
 
 }
 
-for my $prop (qw( title body_source summary_source pagename permalink created lastmod tags meta )) {
+for my $prop ( qw( datesection ) ) {
+    no strict 'refs';
+    *{$prop} = sub {
+        my $self = shift;
+        if ( @_ ) {
+            $self->{'property'}->{$prop} = shift;
+        }
+        else {
+            return $self->{'property'}->{$prop};
+        }
+    }
+}
+
+for my $prop (qw( title body_source summary_source permalink pagename created lastmod tags meta )) {
     no strict 'refs';
     *{$prop} = sub {
         my $self = shift;
