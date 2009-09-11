@@ -586,6 +586,7 @@ use Carp ();
 use Path::Class ();
 use File::Find ();
 use File::stat ();
+use Data::Dumper ();
 use base qw( hlosxom::entries::base );
 
 sub init {
@@ -789,17 +790,9 @@ sub index  {
     my %index       = ();
 
     if ( $use_index && -e $index_file && -r _ ) {
-        my $fh = $index_file->openr or Carp::croak "Failed to open index file: $index_file: $!";
-        while ( my $line = <$fh> ) {
-            chomp($line);
-            if ( $line =~ m{^(\d+):(\d+)=>([^\s]+?)$} ) {
-                $index{$3} = {
-                    created => $1,
-                    lastmod => $2,
-                };
-            }
-        }
-        $fh->close;
+        my $data = eval { do $index_file->stringify } || {};
+        Carp::croak "Failed to load index file: $index_file: $@" if ( $@ );
+        %index = %{ $data };
     }
 
     my $depth = $self->depth;
@@ -837,16 +830,16 @@ sub index  {
     );
 
     if ( $use_index ) {
-        my $data = q{};
-        for my $path ( sort keys %index ) {
-            my ( $created, $lastmod ) = @{ $index{$path} }{qw( created lastmod )};
-            $data .= "${created}:${lastmod}=>${path}\n";
+        local $Data::Dumper::Terse = 1;
+        my $data = Data::Dumper::Dumper( \%index );
+
+        if ( ! -d $index_file->dir ) {
+            $index_file->dir->mkpath;
         }
 
         my $fh = $index_file->openw or Carp::croak "Failed to open index file: $index_file: $!";
         print $fh $data;
         $fh->close;
-
     }
 
     return %index;

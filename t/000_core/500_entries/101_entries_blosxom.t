@@ -185,11 +185,19 @@ is_deeply(
         },
     );
 
-    my $index_data = $db->{'index'}->slurp();
-    is(
-        $index_data,
-          '1230735600:' . stat( $datadir->file('foo.txt') )->mtime      . '=>foo'       . "\n"
-        . '1230735600:' . stat( $datadir->file('foo/bar.txt') )->mtime  . '=>foo/bar'   . "\n",
+    my $data = do $db->{'index'}->stringify;
+    is_deeply(
+        $data,
+        {
+            'foo'       => {
+                created => 1230735600,
+                lastmod => stat( $datadir->file('foo.txt') )->mtime,
+            },
+            'foo/bar'   => {
+                created => 1230735600,
+                lastmod => stat( $datadir->file('foo/bar.txt') )->mtime,
+            },
+        }
     );
 
     is_deeply(
