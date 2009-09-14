@@ -24,6 +24,7 @@ is_deeply(
     hlosxom::entry->new(
         path        => 'foo',
         db          => $entries->db,
+        title       => 'title',
         pagename    => 'foopage',
         tags        => [qw( foo bar baz )],
         meta        => { foo => 'bar', bar => 'baz' },

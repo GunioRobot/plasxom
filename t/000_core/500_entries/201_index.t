@@ -23,6 +23,7 @@ my $index = {
     'foo' => hlosxom::entry->new(
         db => $entries->db,
         path => 'foo',
+        title   => 'title',
         pagename    => 'foopage',
         tags        => [qw( foo bar baz )],
         meta        => { foo => 'bar', bar => 'baz' },
@@ -33,6 +34,7 @@ my $index = {
     'foo/bar' => hlosxom::entry->new(
         db => $entries->db,
         path => 'foo/bar',
+        title   => 'title',
         pagename    => 'foopage',
         tags        => [qw( foo bar baz )],
         meta        => { foo => 'bar', bar => 'baz' },

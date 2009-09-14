@@ -119,6 +119,7 @@ is_deeply(
     { $db->index },
     {
         'foo'       => {
+            title       => 'title',
             pagename    => 'foopage',
             tags        => [qw( foo bar baz )],
             meta        => { foo => 'bar', bar => 'baz' },
@@ -178,6 +179,7 @@ is_deeply(
         { $db->index() },
         {
             'foo'       => {
+                title       => 'title',
                 pagename    => 'foopage',
                 tags        => [qw( foo bar baz )],
                 meta        => { foo => 'bar', bar => 'baz' },
@@ -185,6 +187,7 @@ is_deeply(
                 lastmod     => stat( $datadir->file('foo.txt') )->mtime,
             },
             'foo/bar'   => {
+                title       => 'title',
                 pagename    => 'foopage',
                 tags        => [qw( foo bar baz )],
                 meta        => { foo => 'bar', bar => 'baz' },
@@ -199,6 +202,7 @@ is_deeply(
         $data,
         {
             'foo'       => {
+                title       => 'title',
                 pagename    => 'foopage',
                 tags        => [qw( foo bar baz )],
                 meta        => { foo => 'bar', bar => 'baz' },
@@ -206,6 +210,7 @@ is_deeply(
                 lastmod     => stat( $datadir->file('foo.txt') )->mtime,
             },
             'foo/bar'   => {
+                title       => 'title',
                 pagename    => 'foopage',
                 tags        => [qw( foo bar baz )],
                 meta        => { foo => 'bar', bar => 'baz' },
@@ -220,6 +225,7 @@ is_deeply(
         { $db->index() },
         {
             'foo'       => {
+                title       => 'title',
                 pagename    => 'foopage',
                 tags        => [qw( foo bar baz )],
                 meta        => { foo => 'bar', bar => 'baz' },
@@ -227,6 +233,7 @@ is_deeply(
                 lastmod     => stat( $datadir->file('foo.txt') )->mtime,
             },
             'foo/bar'   => {
+                title       => 'title',
                 pagename    => 'foopage',
                 tags        => [qw( foo bar baz )],
                 meta        => { foo => 'bar', bar => 'baz' },
