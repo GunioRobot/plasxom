@@ -264,7 +264,7 @@ is_deeply(
         . qq{\@foo: bar\n}
         . qq{\@pagename: foobarbaz\n}
         . qq{\@summary: description\n}
-        . qq{\@tags: foo, bar, baz\n}
+        . qq{\@tags: ['foo','bar','baz']\n}
         . qq{body}
     );
 
@@ -291,7 +291,7 @@ is_deeply(
         . qq{\@foo: bar\n}
         . qq{\@pagename: foobarbaz\n}
         . qq{\@summary: description\n}
-        . qq{\@tags: foo, bar, baz\n}
+        . qq{\@tags: ['foo','bar','baz']\n}
         . qq{body}
     );
 

@@ -10,4 +10,4 @@ require_hlosxom;
 
 can_ok( 'hlosxom::util', 'format_tags' );
 
-is( hlosxom::util::format_tags(qw( foo bar baz )), 'foo, bar, baz' );
+is( hlosxom::util::format_tags(qw( foo bar baz )), q{['foo','bar','baz']} );

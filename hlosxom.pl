@@ -1250,6 +1250,7 @@ package hlosxom::util;
 
 use Carp ();
 use Time::Local ();
+use Data::Dumper ();
 
 sub env_value {
     my ( $key ) = @_;
@@ -1369,16 +1370,20 @@ sub format_date {
 sub parse_tags {
     my ( $str ) = @_;
 
-    $str =~ s{\s+}{ }g;
-    $str =~ s{\s*[,]\s*$}{}g;
+    my $tags = eval $str || [];
+    Carp::carp "Tag Parse error: $str: $@" if ( $@ );
 
-    return split m{\s*[,]\s*}, $str;
+    return @{ $tags };
 }
 
 sub format_tags {
     my ( @tags ) = @_;
 
-    return join q{, }, @tags;
+    local $Data::Dumper::Indent = 0;
+    local $Data::Dumper::Terse  = 1;
+    my $str = Data::Dumper::Dumper([ @tags ]);
+
+    return $str;
 }
 
 1;
