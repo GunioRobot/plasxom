@@ -565,6 +565,64 @@ sub entries {
     return @sorted[ $form .. $to ];
 }
 
+sub archives {
+    my ( $self, %args ) = @_;
+
+    my $category = delete $args{'path'} || q{};
+    my %datetime = ();
+    for my $prop (qw( year month day datesection hour minute second )) {
+        if ( exists $args{$prop} ) {
+            my $data = delete $args{$prop};
+            Carp::croak "Argument '${prop}' is not number: $data" if ( $data !~ m{^\d+$} );
+            $datetime{$prop} = $data;
+        }
+    }
+
+    my $sort = delete $args{'sort'} || 'created';
+    Carp::croak "Argument 'sort' is not CODE reference or hlosxom::entry property name" if ( ref $sort && ! ref $sort eq 'CODE' );
+    Carp::croak "Argument 'sort' is not hlosxom::entry property" if ( ! ref $sort && ! hlosxom::entry->can($sort) );
+
+    my $index = $self->index;
+    my %new   = ();
+
+    # filter category
+    $category =~ s{/+}{/}g;
+    $category =~ s{^/*}{};
+
+    for my $fn ( sort keys %{ $index } ) {
+        if ( $fn =~ m{^$category} ) {
+            $new{$fn} = $index->{$fn};
+        }
+    }
+
+    # filter date
+    for my $fn ( sort keys %new ) {
+        my $entry = $new{$fn};
+        my $date  = $entry->date;
+        for my $prop ( qw( year month day datesection hour minute second ) ) {
+            if ( exists $datetime{$prop} ) {
+                my $target = ( $prop eq 'datesection' ) ? $entry->$prop : $date->$prop ;
+                if ( $target != $datetime{$prop} ) {
+                    delete $new{$fn};
+                }
+            }
+        }
+    }
+
+    # sort
+    my @sorted = sort {
+        if ( ref $sort eq 'CODE' ) {
+            return $sort->( $a, $b );
+        }
+        else {
+            return $b->$sort cmp $a->$sort;
+        }
+    } map { $new{$_} } sort keys %new;
+
+
+    return @sorted;
+}
+
 1;
 
 package hlosxom::entries::base;
