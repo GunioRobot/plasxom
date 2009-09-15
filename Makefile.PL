@@ -10,9 +10,16 @@ all_from 'hlosxom.pl';
 requires 'Path::Class';
 requires 'Carp';
 requires 'Text::MicroTemplate';
+requires 'File::Find';
+requires 'File::stat';
+requires 'Data::Dumper';
+requires 'Time::localtime';
 
 test_requires 'Test::More';
 test_requires 'Path::Class';
+test_requires 'Time::Local';
+test_requires 'File::stat';
+test_requires 'File::Temp';
 
 tests 't/*/*/*.t';
 
