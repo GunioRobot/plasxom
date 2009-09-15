@@ -151,15 +151,15 @@ sub setup_entries {
     my ( $class ) = @_;
 
     my $schema = $class->entries_schema_class || 'hlosxom::entries::blosxom';
-    my $config = $class->config->{'entries'} || {};
+    my %config = %{ $class->config->{'entries'} || {} };
 
-    if ( exists $config->{'use_cache'} && !! $config->{'use_cache'} ) {
-        $config->{'cache'} = $class->cache;
+    if ( exists $config{'use_cache'} && $config{'use_cache'} ) {
+        $config{'cache'} = $class->cache;
     }
 
     my $entries = hlosxom::entries->new(
         schema => $schema,
-        %{ $config },
+        %config,
     );
 
     $class->entries( $entries );
