@@ -12,7 +12,7 @@ use Carp ();
 our $VERSION = '0.01';
 
 my %stash = ();
-for my $property ( qw( config plugins methods vars cache entries entries_schema_class ) ) {
+for my $property ( qw( config plugins methods vars cache entries entries_schema_class server ) ) {
     no strict 'refs';
     *{$property} = sub {
         my $class = shift;
@@ -82,6 +82,7 @@ sub setup {
     $class->setup_plugins;
     $class->setup_methods;
     $class->setup_entries;
+    $class->setup_engine;
 
 }
 
@@ -163,6 +164,32 @@ sub setup_entries {
     );
 
     $class->entries( $entries );
+}
+
+sub setup_engine {
+    my ( $class ) = @_;
+
+    my %config      = %{ $class->config->{'server'} || {} };
+
+    my $interface   = delete $config{'interface'} or Carp::croak "Server engine is not specified.";
+    my %args        = %config;
+
+    if ( $interface eq 'MinimalCGI' ) {
+        require HTTP::Engine::MinimalCGI;
+    }
+    else {
+        require HTTP::Engine;
+    }
+
+    my $engine = HTTP::Engine->new(
+        interface => {
+            module          => $interface,
+            args            => { %args },
+            request_handler => sub { return $class->handler( @_ ) },
+        },
+    );
+
+    $class->server( $engine );
 }
 
 1;

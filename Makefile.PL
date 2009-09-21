@@ -14,6 +14,7 @@ requires 'File::Find';
 requires 'File::stat';
 requires 'Data::Dumper';
 requires 'Time::localtime';
+requires 'HTTP::Engine';
 
 test_requires 'Test::More';
 test_requires 'Path::Class';
