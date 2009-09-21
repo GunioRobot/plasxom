@@ -77,7 +77,7 @@ sub setup {
     my ( $class ) = @_;
 
     $class->setup_config;
-    $class->setyp_vars;
+    $class->setup_vars;
     $class->setup_cache;
     $class->setup_plugins;
     $class->setup_methods;
