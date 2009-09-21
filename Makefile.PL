@@ -21,6 +21,7 @@ test_requires 'Path::Class';
 test_requires 'Time::Local';
 test_requires 'File::stat';
 test_requires 'File::Temp';
+test_requires 'HTTP::Request';
 
 tests 't/*/*/*.t';
 
