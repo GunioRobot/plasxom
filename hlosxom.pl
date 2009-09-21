@@ -33,6 +33,22 @@ for my $method ( qw( template interpolate ) ) {
     };
 }
 
+for my $property (qw( request response )) {
+    no strict 'refs';
+    *{$property} = sub {
+        my $self = shift;
+        if ( @_ ) {
+            $self->{$property} = shift @_;
+        }
+        else {
+            return $self->{$property};
+        }
+    }
+}
+
+*req = __PACKAGE__->can('request');
+*res = __PACKAGE__->can('response');
+
 __PACKAGE__->config( hlosxom::hash->new() );
 
 __PACKAGE__->vars( hlosxom::hash->new() );
@@ -190,6 +206,24 @@ sub setup_engine {
     );
 
     $class->server( $engine );
+}
+
+sub handler {
+    my ( $class, $req ) = @_;
+
+    my $app = $class->new;
+       $app->req( $req );
+       $app->res( HTTP::Engine::Response->new );
+
+    $app->run;
+
+    return $app->res;
+}
+
+sub new {
+    my ( $class ) = @_;
+    my $self = bless {}, $class;
+    return $self;
 }
 
 1;
@@ -1476,7 +1510,7 @@ package main;
 
 if ( hlosxom::util::env_value('bootstrap') ) {
     hlosxom->setup;
-    hlosxom->run;
+    hlosxom->server->run;
 }
 
 1;
