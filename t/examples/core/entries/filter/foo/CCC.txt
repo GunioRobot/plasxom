@@ -1,0 +1,7 @@
+title CCC
+@date: 2009-02-02T23:20:30+09:00
+@pagename: AAA
+@link: http://ccc.example.com/ccc.html
+@tags: [qw( bar baz )]
+@summary: bar baz
+CCC

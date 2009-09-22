@@ -1,0 +1,7 @@
+title AAA
+@date: 2009-01-01T10:20:30+09:00
+@pagename: AAA
+@link: http://example.com/AAA.html
+@tags: [qw( foo bar baz )]
+@summary: foo bar baz
+AAA

@@ -1,0 +1,6 @@
+title BBB CCC
+@date: 2009-02-02T20:30:40+09:00
+@pagename: BBB
+@tags: [qw( foo baz )]
+@summary: foo baz
+BBB

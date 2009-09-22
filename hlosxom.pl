@@ -565,6 +565,168 @@ sub entry {
     }
 }
 
+sub filter {
+    my ( $self, %args ) = @_;
+
+    my $path = delete $args{'path'};
+       $path = q{} if ( ! defined $path );
+    my $page = delete $args{'pagename'};
+       $page = q{} if ( ! defined $page );
+
+    my %datetime;
+    for my $prop ( qw( year month day datesection hour minute second ) ) {
+        if ( exists $args{$prop} ) {
+            my $value = delete $args{$prop};
+            Carp::croak "Argument '$prop' is not number: $value" if ( $value !~ m{^\d+$} );
+            $datetime{$prop} = $value;
+        }
+    }
+
+    my $meta    = delete $args{'meta'} || {};
+    Carp::croak "Argument 'meta' is not HASH reference." if ( ref $meta ne 'HASH' );
+
+    my $tag     = delete $args{'tag'};
+    Carp::croak "Argument 'tag' is not HASH reference." if ( defined $tag && ref $tag ne 'HASH' );
+
+    my %text = ();
+    for my $prop ( qw( title body summary ) ) {
+        if ( exists $args{$prop} ) {
+            my $value = delete $args{$prop};
+            Carp::croak "Argument '$prop' is not HASH reference." if ( ref $value ne 'HASH' );
+            $text{$prop} = $value;
+        }
+    }
+
+    my $sortp   = delete $args{'sort'} || 'created';
+    Carp::croak "Argument 'sort' is not CODE reference or hlosxom::entry->property" if ( ref $sortp && ! ref $sortp ne 'CODE' );
+    Carp::croak "Argument 'sort' is not hlosxom::entry property: $sortp" if ( ! ref $sortp && ! hlosxom::entry->can($sortp) );
+    my $sortsub;
+    if ( ref $sortp eq 'CODE' ) {
+        $sortsub = $sortp;
+    }
+    else {
+        $sortsub = sub { $_[1]->$sortp cmp $_[0]->$sortp };
+    }
+
+    # prepare
+    my $index   = $self->index;
+    my %new     = ();
+
+    # filter path
+    $path =~ s{/+}{/}g;
+    $path =~ s{^/*}{};
+
+    for my $fn ( keys %{ $index } ) {
+        if ( $fn =~ m{^$path} ) {
+            $new{$fn} = $index->{$fn};
+        }
+    }
+
+    # filter paggename
+    if ( $page ne q{} ) {
+        for my $fn ( keys %new ) {
+            if ( $new{$fn}->pagename ne $page ) {
+                delete $new{$fn};
+            }
+        }
+    }
+
+    # filter date
+    if ( %datetime ) {
+        for my $fn ( keys %new ) {
+            my $entry   = $new{$fn};
+            my $date    = $entry->date;
+            for my $prop ( keys %datetime ) {
+                my $target = ( $prop eq 'datesection' ) ? $entry->datesection : $date->$prop ;
+                if ( $target != $datetime{$prop} ) {
+                    delete $new{$fn};
+                }
+            }
+        }
+    
+    }
+
+    # filter meta
+    if ( scalar( keys %{ $meta } ) ) {
+        for my $key ( sort keys %{ $meta } ) {
+            my $value = $meta->{$key};
+            Carp::croak "Argument 'meta->{'$key'}' does not set compare value." if ( ! defined $value );
+            FILES: for my $fn ( keys %new ) {
+                my $metadata = $new{$fn}->meta->{$key};
+                if ( ! defined $metadata ) {
+                    delete $new{$fn};
+                    next FILES;
+                }
+
+                if ( ref $value eq 'Regexp' ) {
+                    delete $new{$fn} if ( $metadata !~ $value );
+                }
+                else {
+                    delete $new{$fn} if ( $metadata ne $value );
+                }
+            }
+        }
+    }
+
+    # filter tag
+    if ( defined $tag && ref $tag eq 'HASH' ) {
+        my $words = $tag->{'words'} || [];
+           $words = [ $words ] if ( ref $words ne 'ARRAY' );
+        Carp::croak "Argument 'tag'->{'words'} is empty." if ( @{ $words } == 0 );
+        my $op    = $tag->{'op'} || 'AND';
+        Carp::croak "Unknown tag search operation: $op" if ( $op ne 'AND' && $op ne 'OR' );
+
+        ENTRIES: for my $fn ( keys %new ) {
+            my $tags = $new{$fn}->tags || [];
+            WORDS: for my $word ( @{ $words } ) {
+                for my $tag ( @{ $tags } ) {
+                    if ( $word eq $tag ) {
+                        next WORDS      if ( $op eq 'AND' );
+                        next ENTRIES    if ( $op eq 'OR' );
+                    }
+                }
+                delete $new{$fn} if ( $op eq 'AND' );
+            }
+            delete $new{$fn} if ( $op eq 'OR' );
+        }
+
+    }
+
+    # filter text property
+    if ( %text ) {
+        for my $prop ( sort keys %text ) {
+            my $conf = $text{$prop};
+            my $op   = $conf->{'op'} || 'AND';
+            Carp::croak "Unknown $prop search opeartion: $op" if ( $op ne 'AND' && $op ne 'OR' );
+            my $words = $conf->{'words'} || [];
+               $words = [ $words ] if ( ref $words ne 'ARRAY' );
+            Carp::croak "Argument '$prop'->{'words'} is empty" if ( @{ $words } == 0 );
+            my $filter = sub { return $_[0] };
+               $filter = $conf->{'filter'} if ( exists $conf->{'filter'} );
+            Carp::croak "Argument '$prop'->{'filter'} is not CODE reference." if ( ref $filter ne 'CODE' );
+
+            ENTRIES: for my $fn ( keys %new ) {
+                my $target = $new{$fn}->$prop;
+                   $target = $filter->( $target );
+                WORDS: for my $word ( @{ $words } ) {
+                    $word = quotemeta($word);
+                    if ( $target =~ m{$word} ) {
+                        next WORDS      if ( $op eq 'AND'   );
+                        next ENTRIES    if ( $op eq 'OR'    );
+                    }
+                    delete $new{$fn} if ( $op eq 'AND' );
+                }
+                delete $new{$fn} if ( $op eq 'OR' );
+            }
+        }
+    }
+
+    # sort
+    my @sorted = sort { $sortsub->( $a, $b ) } map { $new{$_} } sort keys %new;
+
+    return @sorted;
+}
+
 sub entries {
     my ( $self, %args ) = @_;
 
