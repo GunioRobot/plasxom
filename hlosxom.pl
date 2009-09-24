@@ -727,6 +727,49 @@ sub filter {
     return @sorted;
 }
 
+sub pagiante {
+    my ( $self, %args ) = @_;
+
+    my $page = delete $args{'page'} || 1 ;
+    Carp::croak "Argument 'page' is not number: $page" if ( $page !~ m{^\d+$} );
+
+    my $num_entries = delete $args{'num_entries'};
+       $num_entries ||= $self->num_entries || 5;
+    Carp::croak "Argument 'num_entries' is not number: $num_entries" if ( $num_entries !~ m{^\d+$} );
+
+    my @filtered = $self->filter( %args );
+
+    my $max     = scalar( @filtered ) - 1;
+    my $from    = $num_entries * ( $page - 1 );
+    my $to      = $from + ( $num_entries - 1 );
+
+    return () if ( $from > $max );
+
+    $to = $max if ( $to > $max );
+
+    return @filtered[ $from .. $to ];
+}
+
+sub total_page {
+    my ( $self, %args ) = @_;
+
+    my $page = delete $args{'page'} || 1 ;
+    Carp::croak "Argument 'page' is not number: $page" if ( $page !~ m{^\d+$} );
+
+    my $num_entries = delete $args{'num_entries'};
+       $num_entries ||= $self->num_entries || 5;
+    Carp::croak "Argument 'num_entries' is not number: $num_entries" if ( $num_entries !~ m{^\d+$} );
+
+    my @filtered = $self->filter( %args );
+
+    my $max = scalar( @filtered );
+
+    my $total = $max / $num_entries;
+       $total = int( $total + 1 ) if ( $total !~ m{^\d+$} );
+
+    return $total;
+}
+
 sub entries {
     my ( $self, %args ) = @_;
 
