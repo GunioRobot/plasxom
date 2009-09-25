@@ -7,7 +7,12 @@ my $basedir = '/path/to/script/dir';
 
 return {
 
-    plugin => {
+    flavour => {
+        dir     => "${basedir}/flavours",
+        default => 'html',
+    },
+
+    plugin  => {
         plugin_dir          => [ "${basedir}/plugins" ],
         plugin_state_dir    => "${basedir}/states",
     },
