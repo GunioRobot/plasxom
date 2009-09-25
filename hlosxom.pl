@@ -954,7 +954,7 @@ sub select {
 
     if ( $self->exists( path => $path ) ) {
         if ( $use_cache ) {
-            my $data = $cache->get($path);
+            my $data = $cache->get("hlosxom-entries-blosxom:${path}");
             if ( defined $data && $data->{'lastmod'} == File::stat::stat( $file )->mtime ) {
                 return %{ $data };
             }
@@ -977,7 +977,7 @@ sub select {
             $self->update( path => $path, %data );
         }
 
-        $cache->set( $path => \%data ) if ( $use_cache );
+        $cache->set( "hlosxom-entries-blosxom:${path}" => \%data ) if ( $use_cache );
 
         return %data;
     }

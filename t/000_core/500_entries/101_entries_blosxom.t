@@ -146,7 +146,7 @@ is_deeply(
     $db->select( path => 'foo' );
 
     is_deeply(
-        $db->{'cache'}->{'cache'}->{'foo'},
+        $db->{'cache'}->{'cache'}->{'hlosxom-entries-blosxom:foo'},
         {
             title           => 'title',
             body_source     => 'body',
@@ -161,7 +161,7 @@ is_deeply(
 
     $db->select( path => 'foo/bar' );
     is_deeply(
-        $db->{'cache'}->{'cache'}->{'foo/bar'},
+        $db->{'cache'}->{'cache'}->{'hlosxom-entries-blosxom:foo/bar'},
         {
             title           => 'title',
             body_source     => 'body',
