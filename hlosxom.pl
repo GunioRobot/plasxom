@@ -157,7 +157,7 @@ sub setup_methods {
     my ( $class ) = @_;
 
     for my $method ( keys %{ $class->methods } ) {
-        if ( ref( my $sub = $class->plugins->run_plugin_first( $method ) ) ) {
+        if ( ref( my $sub = $class->plugins->run_plugin_first( $method ) ) eq 'CODE' ) {
             $class->methods->{$method} = $sub;
         }
     }
