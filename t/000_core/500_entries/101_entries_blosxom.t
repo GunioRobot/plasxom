@@ -6,10 +6,13 @@ use warnings;
 use t::Util qw( require_hlosxom $example );
 use File::stat;
 use File::Temp;
+use Test::Warn;
 use Test::More
     tests => 1 + 3 + 2 + 2 + 1 + 1 + 1 
            + 2 + 3 + 7
-           + 1 + 2 + 1 + 2;
+           + 1 + 2 + 1 + 2
+           + 1;
+
 
 BEGIN { require_hlosxom }
 
@@ -324,3 +327,7 @@ is_deeply(
     ok( $db->remove( path => 'foo' ) );
     ok( ! $db->exists( path => 'foo' ) );
 }
+
+$db = hlosxom::entries::blosxom->new( %args, readonly => 1 );
+
+warning_is { $db->update( path => 'foo', title => 'updated' ) } 'Entries are readonly.';

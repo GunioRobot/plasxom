@@ -892,9 +892,14 @@ sub init {
        $auto_update = !! $auto_update;
 
     $self->{'config'}->{'auto_update'} = $auto_update;
+
+    my $readonly    = delete $args{'readonly'};
+       $readonly    = !! $readonly;
+
+    $self->{'config'}->{'readonly'} = $readonly;
 }
 
-for my $prop (qw( entries_dir file_extension depth use_cache use_index auto_update ))  {
+for my $prop (qw( entries_dir file_extension depth use_cache use_index auto_update readonly ))  {
     no strict 'refs';
     *{$prop} = sub {
         my ( $self ) = @_;
@@ -923,6 +928,11 @@ sub create {
 
 sub update {
     my ( $self, %args ) = @_;
+
+    if ( $self->readonly ) {
+        Carp::carp "Entries are readonly.";
+        return;
+    }
 
     my $path = delete $args{'path'} or Carp::croak "Argument 'path' is not specified.";
        $path = $self->entry_path($path);
@@ -973,7 +983,7 @@ sub select {
             $updated++;
         }
 
-        if ( $updated && $self->auto_update ) {
+        if ( ! $self->readonly && $updated && $self->auto_update ) {
             $self->update( path => $path, %data );
         }
 
