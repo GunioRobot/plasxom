@@ -251,6 +251,7 @@ is_deeply(
     my $db = hlosxom::entries::blosxom->new(
         %args,
         entries_dir => $temp->dirname,
+        auto_update => 1,
     );
 
     # update

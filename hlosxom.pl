@@ -887,9 +887,14 @@ sub init {
 
         $self->{'index'} = $index_file;
     }
+
+    my $auto_update = delete $args{'auto_update'};
+       $auto_update = !! $auto_update;
+
+    $self->{'config'}->{'auto_update'} = $auto_update;
 }
 
-for my $prop (qw( entries_dir file_extension depth use_cache use_index ))  {
+for my $prop (qw( entries_dir file_extension depth use_cache use_index auto_update ))  {
     no strict 'refs';
     *{$prop} = sub {
         my ( $self ) = @_;
@@ -962,8 +967,13 @@ sub select {
         my %data = $self->parse( $source );
            $data{'lastmod'} = File::stat::stat($file)->mtime;
 
-        if ( ! exists $data{'created'} ) {
+        my $updated = 0;
+        if ( ! exists $data{'created'}  ) {
             $data{'created'} = $data{'lastmod'};
+            $updated++;
+        }
+
+        if ( $updated && $self->auto_update ) {
             $self->update( path => $path, %data );
         }
 
