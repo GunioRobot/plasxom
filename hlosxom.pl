@@ -1444,12 +1444,22 @@ sub commit {
 
 package hlosxom::flavour;
 
+use Carp ();
+
 sub new {
     my ( $class, %args ) = @_;
-    bless { %args }, $class;
+    my $self = bless {}, $class;
+
+    for my $prop ( keys %args ) {
+        my $value = $args{$prop};
+        Carp::croak "Unknown flavour property: ${prop} => ${value}" if ( ! $self->can($prop) );
+        $self->$prop( $value );
+    }
+
+    return $self;
 }
 
-for my $prop (qw( year month day flavour url path filename tags meta )) {
+for my $prop (qw( year month day flavour tags meta )) {
     no strict 'refs';
     *{$prop} = sub {
         my $self = shift;
@@ -1460,6 +1470,59 @@ for my $prop (qw( year month day flavour url path filename tags meta )) {
             return $self->{$prop};
         }
     }
+}
+
+sub url {
+    my $self = shift;
+
+    if ( @_ ) {
+        my $url = shift @_;
+           $url =~ s{/*$}{};
+        $self->{'url'} = $url;
+    }
+    else {
+        return $self->{'url'};
+    }
+}
+
+sub path {
+    my $self = shift;
+
+    if ( @_ ) {
+        my $path = shift @_;
+           $path =~ s{/+}{/}g;
+           $path =~ s{^/*}{};
+           $path =~ s{/*$}{};
+        $self->{'path'} = $path;
+    }
+    else {
+        return $self->{'path'};
+    }
+}
+
+sub filename {
+    my $self = shift;
+
+    if ( @_ ) {
+        my $filename = shift @_;
+           $filename =~ s{^/*}{};
+        $self->{'filename'} = $filename;
+    }
+    else {
+        return $self->{'filename'};
+    }
+}
+
+sub path_info {
+    my $self = shift;
+
+    my $path        = $self->path       || q{};
+    my $filename    = $self->filename   || q{};
+       $filename    &&= "/${filename}";
+    my $flavour     = $self->flavour    || q{};
+       $flavour     &&= ".${flavour}";
+
+    return "${path}${filename}${flavour}";
 }
 
 1;

@@ -8,9 +8,9 @@ use Test::More;
 
 require_hlosxom;
 
-my @props = qw( year month day flavour url path filename tags meta );
+my @props = qw( year month day flavour tags meta );
 
-plan tests => 1 + 1 + scalar(@props);
+plan tests => 1 + 1 + scalar(@props) + 3;
 
 my $flavour = hlosxom::flavour->new();
 
@@ -22,3 +22,15 @@ for my $prop ( @props ) {
     $flavour->$prop('foo');
     is( $flavour->$prop, 'foo' );
 }
+
+$flavour->path('/foo/bar/');
+
+is( $flavour->path, 'foo/bar' );
+
+$flavour->filename('/filename');
+
+is( $flavour->filename, 'filename' );
+
+$flavour->flavour('html');
+
+is( $flavour->path_info, 'foo/bar/filename.html' );
