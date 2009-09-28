@@ -4,7 +4,7 @@ use strict;
 use warnings;
 
 use t::Util qw( require_hlosxom $example );
-use Test::More tests => 1 + 1 + 8 + 2 + 2 + 3;
+use Test::More tests => 1 + 1 + 7 + 2 + 2 + 3;
 
 require_hlosxom;
 
@@ -54,11 +54,6 @@ is_deeply(
 is_deeply(
     [ $entries->filter( day => 1 ) ],
     [ $AAA ],
-);
-
-is_deeply(
-    [ $entries->filter( datesection => 2 ) ],
-    [ $CCC ],
 );
 
 is_deeply(

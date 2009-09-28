@@ -28,7 +28,6 @@ is_deeply(
         pagename    => 'foopage',
         tags        => [qw( foo bar baz )],
         meta        => { foo => 'bar', bar => 'baz' },
-        datesection => 1,
         created     => 1230735600,
         lastmod     => stat( $datadir->file('foo.txt') )->mtime,
     ),

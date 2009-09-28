@@ -514,21 +514,6 @@ sub index {
         $index{$path} = $entry;
     }
 
-    # date section
-    my %date2entries = ();
-    for my $entry ( sort { $a->created <=> $b->created || $a->fullpath cmp $b->fullpath } values %index ) {
-        my $key = $entry->date->ymd;
-        $date2entries{$key} ||= [];
-        push @{ $date2entries{$key} }, $entry;
-    }
-    for my $date ( keys %date2entries ) {
-        my $entries = $date2entries{$date};
-        for ( my $i = 0; $i < @{ $entries }; $i++ ) {
-            my $entry = $entries->[$i];
-            $entry->datesection( $i + 1 );
-        }
-    }
-
     $self->{'index'} = \%index;
     $self->indexed(1);
 
@@ -637,7 +622,7 @@ sub filter {
             my $entry   = $new{$fn};
             my $date    = $entry->date;
             for my $prop ( keys %datetime ) {
-                my $target = ( $prop eq 'datesection' ) ? $entry->datesection : $date->$prop ;
+                my $target = $date->$prop;
                 if ( $target != $datetime{$prop} ) {
                     delete $new{$fn};
                 }
@@ -1293,19 +1278,6 @@ sub new {
         formatter   => {},
     }, $class;
 
-}
-
-for my $prop ( qw( datesection ) ) {
-    no strict 'refs';
-    *{$prop} = sub {
-        my $self = shift;
-        if ( @_ ) {
-            $self->{'property'}->{$prop} = shift;
-        }
-        else {
-            return $self->{'property'}->{$prop};
-        }
-    }
 }
 
 for my $prop (qw( title body_source summary_source permalink pagename created lastmod tags meta )) {

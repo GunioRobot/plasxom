@@ -23,7 +23,7 @@ our %entry = (
 my @props = keys %entry;
 
 plan tests =>
-    4                                           # path test
+    3                                           # path test
     + 1                                         # default property
     + 1                                         # default flag
     + 1                                         # database
@@ -87,7 +87,6 @@ my $entry = hlosxom::entry->new(
 # path
 is( $entry->path,           '/path/to'              );
 is( $entry->filename,       'entry'                 );
-is( $entry->datesection,    undef                   );
 is( $entry->fullpath,       '/path/to/entry'        );
 
 # default property
