@@ -1442,6 +1442,28 @@ sub commit {
 
 1;
 
+package hlosxom::flavour;
+
+sub new {
+    my ( $class, %args ) = @_;
+    bless { %args }, $class;
+}
+
+for my $prop (qw( year month day flavour url path filename tags meta )) {
+    no strict 'refs';
+    *{$prop} = sub {
+        my $self = shift;
+        if ( @_ ) {
+            $self->{$prop} = shift @_;
+        }
+        else {
+            return $self->{$prop};
+        }
+    }
+}
+
+1;
+
 package hlosxom::util;
 
 use Carp ();
