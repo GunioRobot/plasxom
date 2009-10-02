@@ -8,7 +8,7 @@ use Test::More;
 
 require_hlosxom;
 
-my @properties = qw( config plugins methods vars cache entries entries_schema_class server );
+my @properties = qw( config plugins methods vars cache entries entries_schema_class server dispatcher );
 
 plan tests => 1 + scalar(@properties);
 

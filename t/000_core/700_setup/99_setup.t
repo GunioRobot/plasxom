@@ -8,7 +8,7 @@ use Test::More;
 
 require_hlosxom;
 
-our @phase = qw( config vars cache plugins methods entries engine );
+our @phase = qw( config vars cache plugins methods entries dispatcher engine );
 
 plan tests => scalar(@phase);
 

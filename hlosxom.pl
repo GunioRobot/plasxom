@@ -12,7 +12,7 @@ use Carp ();
 our $VERSION = '0.01';
 
 my %stash = ();
-for my $property ( qw( config plugins methods vars cache entries entries_schema_class server ) ) {
+for my $property ( qw( config plugins methods vars cache entries entries_schema_class server dispatcher ) ) {
     no strict 'refs';
     *{$property} = sub {
         my $class = shift;
@@ -98,6 +98,7 @@ sub setup {
     $class->setup_plugins;
     $class->setup_methods;
     $class->setup_entries;
+    $class->setup_dispatcher;
     $class->setup_engine;
 
 }
@@ -180,6 +181,15 @@ sub setup_entries {
     );
 
     $class->entries( $entries );
+}
+
+sub setup_dispatcher {
+    my ( $class ) = @_;
+
+    my %config = %{ $class->config->{'dispatch'} || {} };
+    my $dispatcher = hlosxom::dispatcher->new( %config );
+
+    $class->dispatcher( $dispatcher );
 }
 
 sub setup_engine {
