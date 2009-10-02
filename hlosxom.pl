@@ -1448,7 +1448,7 @@ use Carp ();
 
 sub new {
     my ( $class, %args ) = @_;
-    my $self = bless {}, $class;
+    my $self = bless { meta => {}, tags => [] }, $class;
 
     for my $prop ( keys %args ) {
         my $value = $args{$prop};
@@ -1526,6 +1526,140 @@ sub path_info {
 }
 
 1;
+
+package hlosxom::dispatcher;
+
+sub new {
+    my ( $class, %args ) = @_;
+
+    my $regexp  = delete $args{'regexp'} || {};
+    my $rule    = delete $args{'rule'} or Carp::croak "dispatch rule is not specified.";
+    Carp::croak "Argument 'rule' is not ARRAY reference." if ( ref $rule ne 'ARRAY' );
+
+    my $compiled = $class->compile_rule( $rule, $regexp );
+
+    my $self = bless { rules => $compiled }, $class;
+
+    return $self;
+}
+
+sub compile_rule {
+    my ( $class, $rules, $user_regexp ) = @_;
+
+    my $regexp = hlosxom::hash->new(
+        year        => qr{(\d{4})},
+        month       => qr{(\d{2})},
+        day         => qr{(\d{1,2})},
+        category    => qr{((?:[^/]+?/)*)},
+        filename    => qr{([^/]+?)},
+        flavour     => qr{([a-zA-Z0-9_\-]+)},
+    );
+
+    for my $key ( keys %{ $user_regexp || {} } ) {
+        my $value = $user_regexp->{$key};
+        Carp::croak "regexp->$key is not Regexp" if ( ref $value && ref $value ne 'Regexp' );
+        $regexp->merge( $key => $value );
+    }
+
+    for ( my $i = 0; $i < @{ $rules }; $i++ ) {
+        my $rule = $rules->[$i];
+        my $path = $rule->{'path'};
+
+        Carp::croak "rule->[$i]->{'path'} is not specified." if ( ! defined $path );
+
+        my @capture = ();
+        $path =~ s/[{]([a-zA-Z0-9_\-.]+?)[}]/
+            my $match = $1;
+            if ( $match =~ m{^meta[.]} || hlosxom::flavour->can($match) ) {
+                push @capture, $match;
+                $regexp->{$match};
+            }
+            else {
+                Carp::croak "'$match' is not hlosxom::flavour property.";
+            }
+        /ge;
+
+        for my $key ( keys %{ $rule->{'flavour'} || {} } ) {
+            if ( ! $key =~ m{^meta[.]} && ! hlosxom::flavour->can($key) ) {
+                Carp::croak "'$key' is not hlosxom::flavour property.";
+            }
+        }
+
+        $rule->{'path'}      = qr{$path};
+        $rule->{'capture'} ||= [ @capture ];
+    }
+
+    return $rules;
+}
+
+sub rules { $_[0]->{'rules'} }
+
+sub dispatch {
+    my ( $self, $req ) = @_;
+
+    my $flavour     = hlosxom::flavour->new;
+    my $path_info   = $req->headers->header('PATH_INFO') || q{};
+
+    # url
+    my $uri = $req->uri;
+    my $url = "$uri";
+
+    my $len = length($path_info);
+    my $frg = substr( $url, -$len );
+    substr( $url, -$len ) = q{} if ( $frg eq $path_info );
+
+    $flavour->url( $url );
+
+    # path
+    RULES: for my $rule ( @{ $self->rules } ) {
+        my ( $regexp, $capture, $flav, $condition, $hook )
+            = @{ $rule }{qw( path capture flavour condition after_hook )};
+
+
+        # condition
+        if ( defined $condition && ref $condition eq 'HASH' ) {
+            my ( $method, $function ) = @{ $condition }{qw( method function )};
+            $method = [ $method ] if ( ref $method ne 'ARRAY' );
+
+            next RULES if ( @{ $method } && ! grep { $req->method eq uc $_ } @{ $method } );
+            next RULES if ( ref $function eq 'CODE' && ! $function->( $req ) );
+        }
+
+        # path
+        if ( my @matched = ( $path_info =~ $regexp ) ) {
+            my %matched = ();
+            @matched{@{ $capture || [] }} = @matched;
+
+            for my $key ( keys %matched ) {
+                if ( $key =~ m{^meta[.](.+)} ) {
+                    $flavour->meta->{$1} = $matched{$key};
+                }
+                else {
+                    $flavour->$key( $matched{$key} );
+                }
+            }
+
+            # merge flav
+            for my $prop ( keys %{ $flav || {} } ) {
+                if ( $prop =~ m{^meta[.](.+)} ) {
+                    $flavour->meta->{$1} = $flav->{$prop};
+                }
+                else {
+                    $flavour->$prop( $flav->{$prop} );
+                }
+            }
+
+            # after hook
+            if ( ref $hook eq 'CODE' ) {
+                $hook->( $req, $flavour );
+            }
+
+            last RULES;
+        }
+    }
+
+    return $flavour;
+}
 
 package hlosxom::util;
 
