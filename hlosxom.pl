@@ -224,6 +224,7 @@ sub handler {
     my $app = $class->new;
        $app->req( $req );
        $app->res( HTTP::Engine::Response->new );
+       $app->plugins->context( $app );
 
     $app->run;
 
@@ -234,6 +235,18 @@ sub new {
     my ( $class ) = @_;
     my $self = bless {}, $class;
     return $self;
+}
+
+sub prepare {
+    my ( $self ) = @_;
+
+    $self->prepare_plugins;
+
+}
+
+sub prepare_plugins {
+    my ( $self ) = @_;
+    $self->plugins->prepare;
 }
 
 1;

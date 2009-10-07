@@ -4,7 +4,7 @@ use strict;
 use warnings;
 
 use t::Util qw( require_hlosxom );
-use Test::More tests => 3;
+use Test::More tests => 4;
 
 use HTTP::Request;
 
@@ -24,7 +24,17 @@ BEGIN { require_hlosxom; }
 
         isa_ok( $hlosxom->req, 'HTTP::Engine::Request' );
         isa_ok( $hlosxom->res, 'HTTP::Engine::Response' );
+    };
+
+    package plugins;
+    
+    sub new { bless {}, shift }
+    sub context {
+        our ( $self, $context ) = @_;
+        package main;
+        isa_ok( $plugins::context, 'hlosxom' );
     }
+
 }
 
 hlosxom->config->merge(
@@ -34,6 +44,7 @@ hlosxom->config->merge(
 );
 
 hlosxom->setup_engine;
+hlosxom->plugins( plugins->new );
 
 my $res = hlosxom->server->run( HTTP::Request->new( GET => 'http://localhost/' ) );
 
