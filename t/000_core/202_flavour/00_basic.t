@@ -8,7 +8,7 @@ use Test::More;
 
 require_hlosxom;
 
-my @props = qw( year month day flavour tags meta no_matched pagename );
+my @props = qw( year month day flavour tags meta no_matched pagename tag_op );
 
 plan tests => 1 + 1 + scalar(@props) + 3;
 

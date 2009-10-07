@@ -4,7 +4,7 @@ use strict;
 use warnings;
 
 use t::Util qw( require_hlosxom );
-use Test::More tests => 2;
+use Test::More tests => 3;
 
 BEGIN { require_hlosxom }
 
@@ -13,7 +13,7 @@ BEGIN { require_hlosxom }
     
     no strict 'refs';
     no warnings 'redefine';
-    for my $phase (qw( plugins flavour )) {
+    for my $phase (qw( plugins flavour entries )) {
         *{"prepare_${phase}"} = sub {
             package main;
             ok(1);

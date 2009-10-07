@@ -4,7 +4,7 @@ use strict;
 use warnings;
 
 use t::Util qw( require_hlosxom );
-use Test::More tests => 8;
+use Test::More tests => 10;
 
 require_hlosxom;
 
@@ -49,3 +49,11 @@ is( $entries->num_entries, 10 );
 $entries->num_entries(20);
 
 is( $entries->num_entries, 20 );
+
+isa_ok( $entries->filtered, 'ARRAY' );
+$entries->filtered( [ qw( foo bar baz ) ]);
+
+is_deeply(
+    $entries->filtered,
+    [qw( foo bar baz )],
+);

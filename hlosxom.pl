@@ -242,6 +242,7 @@ sub prepare {
 
     $self->prepare_plugins;
     $self->prepare_flavour;
+    $self->prepare_entries;
 }
 
 sub prepare_plugins {
@@ -253,6 +254,56 @@ sub prepare_flavour {
     my ( $self ) = @_;
     $self->flavour( $self->dispatcher->dispatch( $self->req ) );
     $self->plugins->run_plugins('prepare_flavour' => $self->flavour );
+}
+
+sub prepare_entries {
+    my ( $self ) = @_;
+
+    my $flavour = $self->flavour;
+    my $entries = $self->entries;
+    my $plugins = $self->plugins;
+
+    # update entries
+    for my $entry (sort { $b->lastmod <=> $a->lastmod } values %{ $entries->index || {} }) {
+        $plugins->run_plugins('update' => $entry );
+    }
+
+    my %args    = ();
+
+    # date, flavour and pagename
+    for my $prop (qw( year month day flavour pagename )) {
+        $args{$prop} = $flavour->$prop if ( $flavour->$prop );
+    }
+
+    # path, filename
+    my $path = $flavour->path;
+       $path = q{}        if ( ! defined $path );
+       $path = "${path}/" if ( $path ne q{} );
+       $path .= $flavour->filename if ( $flavour->filename ne q{} );
+    $args{'path'} = $path;
+
+    # meta
+    if ( scalar(keys %{ $flavour->meta || {} }) ) {
+        $args{'meta'} = {};
+        my $meta = $flavour->meta;
+        for my $key ( keys %{ $meta } ) {
+            my $value = $meta->{$key};
+            $args{'meta'}->{$key} = "$value";
+        }
+    }
+
+    # tags
+    if ( @{ $flavour->tags } ) {
+        $args{'tag'} = {
+            op      => $flavour->tag_op || 'AND',
+            words   => [@{ $flavour->tags }],
+        };
+    }
+
+    my $filtered = [ $entries->filter( %args ) ];
+    $self->entries->filtered( $filtered );
+
+    $self->plugins->run_plugins('filtered' => $filtered);
 }
 
 1;
@@ -489,12 +540,13 @@ sub new {
     Carp::croak "Argument 'num_entries' is not number" if ( $num !~ m{^\d+$} );
 
     my $self = bless {
-        db      => $db,
-        index   => {},
-        config  => {
+        db          => $db,
+        index       => {},
+        filtered    => [],
+        config      => {
             num_entries => $num,
         },
-        flag    => {
+        flag        => {
             indexed => 0,
         },
     }, $class;
@@ -524,6 +576,19 @@ sub num_entries {
     }
     else {
         return $self->{'config'}->{'num_entries'};
+    }
+}
+
+sub filtered {
+    my $self = shift;
+
+    if ( @_ ) {
+        my $list = shift @_;
+        Carp::croak "Argument is not ARRAY reference." if ( ref $list ne 'ARRAY' );
+        $self->{'filtered'} = $list;
+    }
+    else {
+        return $self->{'filtered'};
     }
 }
 
@@ -1488,7 +1553,7 @@ sub new {
     return $self;
 }
 
-for my $prop (qw( year month day flavour tags meta no_matched pagename )) {
+for my $prop (qw( year month day flavour tags meta no_matched pagename tag_op )) {
     no strict 'refs';
     *{$prop} = sub {
         my $self = shift;
