@@ -4,7 +4,7 @@ use strict;
 use warnings;
 
 use t::Util qw( require_hlosxom );
-use Test::More tests => 1 + 5 + 2 + 6;
+use Test::More tests => 1 + 5 + 2 + 6 + 1;
 use HTTP::Engine::Test::Request;
 
 require_hlosxom;
@@ -67,3 +67,7 @@ is_deeply(
     },
 );
 
+$req    = HTTP::Engine::Test::Request->new( uri => 'http://localhost/foo/bar/baz.html', method => 'GET', headers => [ PATH_INFO => '/foo/bar/baz.html' ] );
+$flav   = $dispatcher->dispatch( $req );
+
+ok( $flav->no_matched );

@@ -8,7 +8,7 @@ use Test::More;
 
 require_hlosxom;
 
-my @properties = qw( request response );
+my @properties = qw( request response flavour );
 my %alias = ( req => 'request', res => 'response' );
 
 plan tests => 1 + scalar(@properties) + ( scalar(keys %alias) * 2 );

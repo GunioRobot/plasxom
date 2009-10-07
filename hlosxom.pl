@@ -33,7 +33,7 @@ for my $method ( qw( template interpolate ) ) {
     };
 }
 
-for my $property (qw( request response )) {
+for my $property (qw( request response flavour )) {
     no strict 'refs';
     *{$property} = sub {
         my $self = shift;
@@ -241,12 +241,19 @@ sub prepare {
     my ( $self ) = @_;
 
     $self->prepare_plugins;
+    $self->prepare_flavour;
 
 }
 
 sub prepare_plugins {
     my ( $self ) = @_;
     $self->plugins->prepare;
+}
+
+sub prepare_flavour {
+    my ( $self ) = @_;
+    $self->flavour( $self->dispatcher->dispatch( $self->req ) );
+    $self->plugins->run_plugins('prepare_flavour' => $self->flavour );
 }
 
 1;
@@ -1482,7 +1489,7 @@ sub new {
     return $self;
 }
 
-for my $prop (qw( year month day flavour tags meta )) {
+for my $prop (qw( year month day flavour tags meta no_matched )) {
     no strict 'refs';
     *{$prop} = sub {
         my $self = shift;
@@ -1677,9 +1684,11 @@ sub dispatch {
                 $hook->( $req, $flavour );
             }
 
-            last RULES;
+            return $flavour;
         }
     }
+
+    $flavour->no_matched(1);
 
     return $flavour;
 }
