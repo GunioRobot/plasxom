@@ -1488,7 +1488,7 @@ sub new {
     return $self;
 }
 
-for my $prop (qw( year month day flavour tags meta no_matched )) {
+for my $prop (qw( year month day flavour tags meta no_matched pagename )) {
     no strict 'refs';
     *{$prop} = sub {
         my $self = shift;
