@@ -242,7 +242,6 @@ sub prepare {
 
     $self->prepare_plugins;
     $self->prepare_flavour;
-
 }
 
 sub prepare_plugins {
