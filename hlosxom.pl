@@ -252,8 +252,15 @@ sub prepare_plugins {
 
 sub prepare_flavour {
     my ( $self ) = @_;
+
+    my %config = %{ $self->config->{'flavour'} || {} };
+    my $default = delete $config{'default'};
+       $default = 'html' if ( ! defined $default );
+
     $self->flavour( $self->dispatcher->dispatch( $self->req ) );
-    $self->plugins->run_plugins('flavour' => $self->flavour );
+    $self->flavour->flavour( $default ) if ( ! defined $self->flavour->flavour );
+
+    $self->plugins->run_plugins('flavour' => $self->flavour);
 }
 
 sub prepare_entries {
