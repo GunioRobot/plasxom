@@ -18,7 +18,7 @@ require_hlosxom;
         our ( $self, $method, @args ) = @_;
         package main;
         
-        is( $plugins::method, 'prepare_flavour' );
+        is( $plugins::method, 'flavour' );
         is( scalar( @plugins::args ), 1 );
 
         is_deeply(

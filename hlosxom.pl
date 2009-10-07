@@ -253,7 +253,7 @@ sub prepare_plugins {
 sub prepare_flavour {
     my ( $self ) = @_;
     $self->flavour( $self->dispatcher->dispatch( $self->req ) );
-    $self->plugins->run_plugins('prepare_flavour' => $self->flavour );
+    $self->plugins->run_plugins('flavour' => $self->flavour );
 }
 
 sub prepare_entries {
