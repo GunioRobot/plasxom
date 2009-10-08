@@ -313,7 +313,7 @@ sub prepare_entries {
     my $filtered = [ $entries->filter( %args ) ];
     $self->entries->filtered( $filtered );
 
-    $self->plugins->run_plugins('filtered' => $filtered);
+    $self->plugins->run_plugins('entries' => $filtered);
 }
 
 1;

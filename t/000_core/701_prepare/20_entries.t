@@ -59,7 +59,7 @@ our $entries = hlosxom::entries->new(
         if ( $plugins::method eq 'update' ) {
             isa_ok( $arg, 'hlosxom::entry' );
         }
-        elsif ( $plugins::method eq 'filtered' ) {
+        elsif ( $plugins::method eq 'entries' ) {
             is_deeply(
                 $arg,
                 [ $main::entries->entry( path => 'foo' ) ],
