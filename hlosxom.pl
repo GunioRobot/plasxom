@@ -181,6 +181,9 @@ sub setup_entries {
     );
 
     $class->entries( $entries );
+
+
+    $class->plugins->run_plugins('filter' => $entries);
 }
 
 sub setup_dispatcher {
