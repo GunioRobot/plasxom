@@ -349,6 +349,11 @@ sub templatize {
     $self->res->body( $output );
 }
 
+sub finalize {
+    my ( $self ) = @_;
+    $self->plugins->run_plugins('end');
+}
+
 1;
 
 package hlosxom::hash;
