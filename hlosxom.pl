@@ -240,6 +240,18 @@ sub new {
     return $self;
 }
 
+sub run {
+    my ( $self ) = @_;
+
+    $self->prepare;
+
+    if ( ! $self->plugins->run_plugin_first('skip') ) {
+        $self->templatize;
+    }
+
+    $self->finalize;
+}
+
 sub prepare {
     my ( $self ) = @_;
 
@@ -314,6 +326,27 @@ sub prepare_entries {
     $self->entries->filtered( $filtered );
 
     $self->plugins->run_plugins('entries' => $filtered);
+}
+
+sub templatize {
+    my ( $self ) = @_;
+
+    my $flavour     = $self->flavour;
+    my $plugins     = $self->plugins;
+
+    my $template    = $self->template( $self->req->headers->header('PATH_INFO'), 'template', $flavour->flavour );
+    my $vars        = {
+        entries => $self->entries->filtered,
+        flavour => $flavour,
+    };
+
+    $plugins->run_plugins('templatize', \$template, $vars);
+
+    my $output = $self->interpolate( $template, $vars );
+
+    $plugins->run_plugins('output', \$output);
+
+    $self->res->body( $output );
 }
 
 1;
