@@ -12,7 +12,7 @@ use Carp ();
 our $VERSION = '0.01';
 
 my %stash = ();
-for my $property ( qw( config plugins methods vars cache entries entries_schema_class server dispatcher ) ) {
+for my $property ( qw( config plugins methods vars cache entries entries_schema_class server dispatcher api ) ) {
     no strict 'refs';
     *{$property} = sub {
         my $class = shift;
@@ -52,6 +52,8 @@ for my $property (qw( request response flavour )) {
 __PACKAGE__->config( hlosxom::hash->new() );
 
 __PACKAGE__->vars( hlosxom::hash->new() );
+
+__PACKAGE__->api( hlosxom::api->new() );
 
 __PACKAGE__->methods({
     template    => sub {
@@ -371,6 +373,35 @@ sub merge {
 }
 
 1;
+
+package hlosxom::api;
+
+use Carp;
+
+sub new {
+    my ( $class ) = @_;
+    return bless { API => {} }, $class;
+}
+
+sub register {
+    my ( $self, $instance, @methods ) = @_;
+
+    while ( my ( $method, $function ) = splice @methods, 0, 2 ) {
+        Carp::croak "Method Code is not CODE reference." if ( ref $function ne 'CODE' );
+        $self->{'API'}->{$method} = {
+            instance => $instance,
+            function => $function,
+        };
+    }
+}
+
+sub call {
+    my ( $self, $method, @args ) = @_;
+    Carp::croak "${method} is not exists." if ( ! exists $self->{'API'}->{$method} );
+    my ( $instance, $function ) = @{ $self->{'API'}->{$method} }{qw( instance function )};
+
+    return $function->( $instance, @args );
+}
 
 package hlosxom::cache;
 
