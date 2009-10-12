@@ -701,7 +701,7 @@ sub filter {
        $page = q{} if ( ! defined $page );
 
     my %datetime;
-    for my $prop ( qw( year month day datesection hour minute second ) ) {
+    for my $prop ( qw( year month day hour minute second ) ) {
         if ( exists $args{$prop} ) {
             my $value = delete $args{$prop};
             Carp::croak "Argument '$prop' is not number: $value" if ( $value !~ m{^\d+$} );
