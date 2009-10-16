@@ -4,7 +4,7 @@ use strict;
 use warnings;
 
 use t::Util qw( require_hlosxom );
-use Test::More tests => 1 + 5 + 2 + 6 + 1;
+use Test::More tests => 1 + 5 + 2 + 7 + 1;
 use HTTP::Engine::Test::Request;
 
 require_hlosxom;
@@ -23,9 +23,10 @@ my $dispatcher = hlosxom::dispatcher->new(
             },
         },
         {
-            path        => '/{meta.author}/{year}/{month}/{day}/{meta.datesection}(?:[.]{flavour})',
+            path        => '/{meta.author}/{year}/{month}/{day}/{stash.datesection}(?:[.]{flavour})',
             flavour     => {
                 'meta.category' => 'foo',
+                'stash.foo'     => 'bar',
                 'filename'      => 'bar',
             },
             after_hook  => sub {
@@ -37,7 +38,7 @@ my $dispatcher = hlosxom::dispatcher->new(
     ],
     regexp  => {
         'meta.author'       => qr{([a-zA-z0-9]+)},
-        'meta.datesection'  => qr{(\d+)},
+        'stash.datesection'  => qr{(\d+)},
     },
 );
 
@@ -62,9 +63,15 @@ is_deeply(
     $flav->meta,
     {
         author      => 'nyarla',
-        datesection => 3,
         category    => 'foo',
     },
+);
+is_deeply(
+    $flav->stash,
+    {
+        datesection => 3,
+        foo         => 'bar',
+    }
 );
 
 $req    = HTTP::Engine::Test::Request->new( uri => 'http://localhost/foo/bar/baz.html', method => 'GET', headers => [ PATH_INFO => '/foo/bar/baz.html' ] );

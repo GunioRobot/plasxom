@@ -1694,7 +1694,7 @@ use Carp ();
 
 sub new {
     my ( $class, %args ) = @_;
-    my $self = bless { meta => {}, tags => [] }, $class;
+    my $self = bless { meta => {}, stash => {}, tags => [] }, $class;
 
     for my $prop ( keys %args ) {
         my $value = $args{$prop};
@@ -1816,7 +1816,7 @@ sub compile_rule {
         my @capture = ();
         $path =~ s/[{]([a-zA-Z0-9_\-.]+?)[}]/
             my $match = $1;
-            if ( $match =~ m{^meta[.]} || hlosxom::flavour->can($match) ) {
+            if ( $match =~ m{^meta[.]} || $match =~ m{^stash[.]} || hlosxom::flavour->can($match) ) {
                 push @capture, $match;
                 $regexp->{$match};
             }
@@ -1826,7 +1826,7 @@ sub compile_rule {
         /ge;
 
         for my $key ( keys %{ $rule->{'flavour'} || {} } ) {
-            if ( ! $key =~ m{^meta[.]} && ! hlosxom::flavour->can($key) ) {
+            if ( ! $key =~ m{^meta[.]} && ! $key =~ m{^stash[.]} && ! hlosxom::flavour->can($key) ) {
                 Carp::croak "'$key' is not hlosxom::flavour property.";
             }
         }
@@ -1880,6 +1880,9 @@ sub dispatch {
                 if ( $key =~ m{^meta[.](.+)} ) {
                     $flavour->meta->{$1} = $matched{$key};
                 }
+                elsif ( $key =~ m{^stash[.](.+)} ) {
+                    $flavour->stash->{$1} = $matched{$key};
+                }
                 else {
                     $flavour->$key( $matched{$key} );
                 }
@@ -1889,6 +1892,9 @@ sub dispatch {
             for my $prop ( keys %{ $flav || {} } ) {
                 if ( $prop =~ m{^meta[.](.+)} ) {
                     $flavour->meta->{$1} = $flav->{$prop};
+                }
+                elsif ( $prop =~ m{^stash[.](.+)} ) {
+                    $flavour->stash->{$1} = $flav->{$prop};
                 }
                 else {
                     $flavour->$prop( $flav->{$prop} );
