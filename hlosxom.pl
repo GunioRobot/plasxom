@@ -450,8 +450,11 @@ sub new {
     my $args  = delete $args{'args'};
     my $deref = ( !! $args{'deref'} ) ? 1 : 0 ;
 
-    eval { require $cache_class } if ( $cache_class ne 'hlosxom::cache::memory' );
-    Carp::croak "Failed to load cache class: ${cache_class}: $@" if ( $@ );
+    my $module_path = $cache_class . '.pm';
+       $module_path =~ s{::}{/}g;
+
+    eval { require $module_path } if ( $cache_class ne 'hlosxom::cache::memory' );
+    Carp::croak "Failed to load cache class: ${cache_class} => ${module_path}: $@" if ( $@ );
 
     my $cache;
     if ( $deref ) {
