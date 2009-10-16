@@ -1799,7 +1799,7 @@ sub compile_rule {
         year        => qr{(\d{4})},
         month       => qr{(\d{2})},
         day         => qr{(\d{1,2})},
-        category    => qr{((?:[^/]+?/)*)},
+        path        => qr{((?:[^/]+?/)*)},
         filename    => qr{([^/]+?)},
         flavour     => qr{([a-zA-Z0-9_\-]+)},
     );
