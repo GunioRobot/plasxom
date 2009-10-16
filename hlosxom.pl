@@ -316,6 +316,16 @@ sub prepare_entries {
         }
     }
 
+    # stash
+    if ( scalar( keys %{ $flavour->stash || {} } ) ) {
+        $args{'stash'} = {};
+        my $stash = $flavour->stash;
+        for my $key ( keys %{ $stash } ) {
+            my $value = $stash->{$key};
+            $args{'stash'}->{$key} = "$value";
+        }
+    }
+
     # tags
     if ( @{ $flavour->tags } ) {
         $args{'tag'} = {

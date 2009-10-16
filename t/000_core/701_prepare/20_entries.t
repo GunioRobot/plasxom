@@ -39,6 +39,9 @@ our $entries = hlosxom::entries->new(
                 meta => {
                     key => "(?-xism:value)",
                 },
+                stash   => {
+                    key => 'value',
+                },
                 tag => {
                     op => 'OR',
                     words => [qw( foo bar baz )],
@@ -83,6 +86,9 @@ my $app = hlosxom->new;
         filename => 'bar',
         meta => {
             key => qr{value},
+        },
+        stash   => {
+            key => 'value',
         },
         tags => [qw( foo bar baz )],
         tag_op => 'OR',
