@@ -8,6 +8,7 @@ package hlosxom;
 use Text::MicroTemplate ();
 use Path::Class ();
 use Carp ();
+use HTTP::Engine;
 
 our $VERSION = '0.01';
 
@@ -204,13 +205,6 @@ sub setup_engine {
 
     my $interface   = delete $config{'interface'} or Carp::croak "Server engine is not specified.";
     my %args        = %config;
-
-    if ( $interface eq 'MinimalCGI' ) {
-        require HTTP::Engine::MinimalCGI;
-    }
-    else {
-        require HTTP::Engine;
-    }
 
     my $engine = HTTP::Engine->new(
         interface => {
