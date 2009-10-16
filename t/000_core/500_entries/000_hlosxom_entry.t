@@ -25,6 +25,7 @@ my @props = keys %entry;
 plan tests =>
     3                                           # path test
     + 1                                         # default property
+    + 1                                         # default stash
     + 1                                         # default flag
     + 1                                         # database
     + 2 + 2 + (scalar(@props) * 5) + ( 2 * 6 )  # property test
@@ -79,9 +80,10 @@ plan tests =>
 };
 
 my $entry = hlosxom::entry->new(
-    path => '/path/to/entry',
-    db   => 'TestLoader',
-    title => 'foobarbaz',
+    path    => '/path/to/entry',
+    db      => 'TestLoader',
+    title   => 'foobarbaz',
+    stash   => { foo => 'bar' },
 );
 
 # path
@@ -94,6 +96,9 @@ is_deeply( $entry->{'property'}, { title => 'foobarbaz' } );
 
 # default flag
 is( $entry->loaded, 0 );
+
+# default stash
+is_deeply( $entry->stash, { foo => 'bar' } );
 
 # database
 is( $entry->db, 'TestLoader' );

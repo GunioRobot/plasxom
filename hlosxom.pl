@@ -1445,12 +1445,16 @@ sub new {
         Carp::croak "Invalid path: ${fullpath}";
     }
 
+    my $stash = delete $args{'stash'} || {};
+    Carp::croak "Argument 'stash' is not HASH reference." if ( ref $stash ne 'HASH' );
+
     my $self = bless {
         path        => {
             path            => $path,
             filename        => $fn,
         },
         property    => { %args },
+        stash       => { %{ $stash } },
         flag        => {
             loaded => 0,
         },
@@ -1522,6 +1526,7 @@ sub clear_all {
     $self->{'property'}  = {};
     $self->{'flag'}      = { loaded => 0 };
     $self->{'formatter'} = {};
+    $self->{'stash'}     = {};
 
     return 1;
 }
@@ -1558,6 +1563,8 @@ for my $flag (qw( loaded )) {
         }
     };
 }
+
+sub stash { $_[0]->{'stash'} }
 
 sub date {
     my ( $self ) = @_;
