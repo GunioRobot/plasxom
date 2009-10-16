@@ -383,7 +383,7 @@ sub templatize {
 
     $plugins->run_plugins('output', \$output);
 
-    $self->res->headers->header('Content-Type' => $content_type);
+    $self->res->header('Content-Type' => $content_type);
     $self->res->body( $output );
 }
 
@@ -1847,7 +1847,7 @@ sub dispatch {
     my ( $self, $req ) = @_;
 
     my $flavour     = hlosxom::flavour->new;
-    my $path_info   = $req->headers->header('PATH_INFO') || q{};
+    my $path_info   = $req->header('PATH_INFO') || q{};
 
     # url
     my $uri = $req->uri;
