@@ -4,7 +4,7 @@ use strict;
 use warnings;
 
 use t::Util qw( require_hlosxom $example );
-use Test::More tests => 1 + 1 + 7 + 2 + 2 + 3;
+use Test::More tests => 1 + 1 + 7 + 2 + 2 + 2 + 3;
 
 require_hlosxom;
 
@@ -22,6 +22,9 @@ my $entries = hlosxom::entries->new(
 my $AAA = $entries->entry( path => 'AAA' );
 my $BBB = $entries->entry( path => 'foo/BBB' );
 my $CCC = $entries->entry( path => 'foo/CCC' );
+
+$AAA->stash->{'foo'} = 'bar';
+$BBB->stash->{'foo'} = 'barbaz';
 
 # filter path
 is_deeply(
@@ -80,6 +83,17 @@ is_deeply(
 is_deeply(
     [ $entries->filter( meta => { link => qr{^http:} } ) ],
     [ ( sort { $b->created <=> $a->created } ( $AAA, $CCC ) ) ],
+);
+
+# filter stash
+is_deeply(
+    [ $entries->filter( stash => { foo => 'bar' } ) ],
+    [ $AAA ],
+);
+
+is_deeply(
+    [ $entries->filter( stash => { foo => qr{baz$} } ) ],
+    [ $BBB ],
 );
 
 # filter tags

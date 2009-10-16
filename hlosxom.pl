@@ -750,6 +750,9 @@ sub filter {
     my $meta    = delete $args{'meta'} || {};
     Carp::croak "Argument 'meta' is not HASH reference." if ( ref $meta ne 'HASH' );
 
+    my $stash   = delete $args{'stash'} || {};
+    Carp::croak "Argument 'stash' is not HASH reference." if ( ref $stash ne 'HASH' );
+
     my $tag     = delete $args{'tag'};
     Carp::croak "Argument 'tag' is not HASH reference." if ( defined $tag && ref $tag ne 'HASH' );
 
@@ -811,7 +814,34 @@ sub filter {
     
     }
 
-    # filter meta
+    # filter meta and stash
+    if ( scalar( keys %{ $meta } ) || scalar( keys %{ $stash } ) ) {
+        for my $name ( qw( meta stash ) ) {
+            my $target = ( $name eq 'meta' ) ? $meta : $stash ;
+            if ( scalar( keys %{ $target } ) ) {
+                for my $key ( sort keys %{ $target } ) {
+                    my $value = $target->{$key};
+                    Carp::croak "Argument '${name}->{${key}}' does not set compare value." if ( ! defined $value );
+                    FILES: for my $fn ( keys %new ) {
+                        my $targetdata = $new{$fn}->$name->{$key};
+                        if ( ! defined $targetdata ) {
+                            delete $new{$fn};
+                            next FILES;
+                        }
+
+                        if ( ref $value eq 'Regexp' ) {
+                            delete $new{$fn} if ( $targetdata !~ $value );
+                        }
+                        else {
+                            delete $new{$fn} if ( $targetdata ne $value );
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+
     if ( scalar( keys %{ $meta } ) ) {
         for my $key ( sort keys %{ $meta } ) {
             my $value = $meta->{$key};
