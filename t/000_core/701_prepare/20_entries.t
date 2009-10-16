@@ -4,7 +4,7 @@ use strict;
 use warnings;
 
 use t::Util qw( require_hlosxom $example );
-use Test::More tests => 5;
+use Test::More tests => 9;
 
 require_hlosxom;
 
@@ -52,6 +52,17 @@ our $entries = hlosxom::entries->new(
         return ( $main::entries->entry( path => 'foo' ) );
     };
 
+    *{'paginate'} = sub {
+        our ( $self, %args ) = @_;
+        package main;
+
+        is( $hlosxom::entries::args{'page'}, 1 );
+
+        package hlosxom::entries;
+        
+        return $self->filter( %args );
+    };
+
     package plugins;
 
     sub new { bless {}, shift }
@@ -93,6 +104,9 @@ my $app = hlosxom->new;
         tags => [qw( foo bar baz )],
         tag_op => 'OR',
    ) );
+   $app->prepare_entries;
+   
+   $app->flavour->page('all');
    $app->prepare_entries;
 
 is_deeply(

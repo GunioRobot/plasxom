@@ -334,7 +334,26 @@ sub prepare_entries {
         };
     }
 
-    my $filtered = [ $entries->filter( %args ) ];
+    # page
+    my $page;
+    if ( defined $flavour->page ) {
+        $page = $flavour->page;
+        if ( $page eq 'all' ) {
+            $page   = 'all';
+        }
+        else {
+            $page   ||= 1;
+            $page   = 1 if ( $page !~ m{^\d+$} );
+            $args{'page'} = $page;
+        }
+    }
+    elsif ( defined $flavour->year || defined $flavour->month || defined $flavour->day ) {
+        $page   = 'all';
+    }
+
+    my $method = ( $page eq 'all' ) ? 'filter' : 'pagiante' ;
+
+    my $filtered = [ $entries->$method( %args ) ];
     $self->entries->filtered( $filtered );
 
     $self->plugins->run_plugins('entries' => $filtered);
