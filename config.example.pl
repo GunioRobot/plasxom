@@ -29,6 +29,23 @@ return {
         # { plugin => 'PluginName', config => \%config },
     }
 
+    entries     => {
+        entries_dir     => "${basedir}/entries",
+        file_extension  => 'txt',
+
+        meta_prefix     => 'meta-',
+        # meta_mapping    => { $hlosxom::entry property => 'meta key' },
+
+        use_cache       => 1,
+        use_index       => 1,
+        index_file      => "${statedir}/entries.index",
+
+        auto_update     => 0,
+        readonly        => 1,
+
+        num_entries => 5,
+    },
+
     vars        => {
     # foo => 'bar',
     },
