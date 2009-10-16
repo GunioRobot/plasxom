@@ -4,7 +4,7 @@ use strict;
 use warnings;
 
 use t::Util qw( require_hlosxom );
-use Test::More tests => 7;
+use Test::More tests => 11;
 use HTTP::Engine::Test::Request;
 use HTTP::Engine::Response;
 
@@ -24,7 +24,8 @@ require_hlosxom;
             is_deeply(
                 [ @plugins::args ],
                 [
-                    \q{foo},
+                    \q{text/plain;},
+                    \q{text/plain;},
                     {
                         entries => [qw( foo bar baz )],
                         flavour => hlosxom::flavour->new( flavour => 'atom' ),
@@ -55,18 +56,18 @@ my $app = hlosxom->new;
    $app->entries( entries->new );
    $app->methods->{'template'}      = sub {
         my ( $app, $path, $chunk, $flavour ) = @_;
-        
+
         is( $path, '/foo/bar/baz.atom' );
-        is( $chunk, 'template' );
         is( $flavour, 'atom' );
-        
-        return 'foo';
+        ok( $chunk eq 'template' || $chunk eq 'content_type' );
+
+        return 'text/plain;';
    };
    $app->methods->{'interpolate'}   = sub {
         my ( $app, $template, $vars ) = @_;
         is_deeply(
             [ $template, $vars ],
-            [ 'foo', { entries => [qw( foo bar baz )], flavour => hlosxom::flavour->new( flavour => 'atom' ), } ],
+            [ 'text/plain;', { entries => [qw( foo bar baz )], flavour => hlosxom::flavour->new( flavour => 'atom' ), } ],
         );
 
         return 'bar';
@@ -75,4 +76,5 @@ my $app = hlosxom->new;
    $app->res( HTTP::Engine::Response->new );
    $app->templatize;
    
+   is( $app->res->headers->header('Content-Type'), 'text/plain;' );
    is( $app->res->body, 'bar' );

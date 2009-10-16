@@ -336,18 +336,25 @@ sub templatize {
     my $flavour     = $self->flavour;
     my $plugins     = $self->plugins;
 
-    my $template    = $self->template( $self->req->headers->header('PATH_INFO'), 'template', $flavour->flavour );
-    my $vars        = {
+    my $path_info   = $self->req->headers->header('PATH_INFO') || q{};
+    my $flav_ext    = $flavour->flavour;
+
+    my $content_type    = $self->template( $path_info, 'content_type', $flav_ext ) || 'text/plain; charset=UTF-8';
+       $content_type    =~ s{\n.*}{};
+
+    my $template        = $self->template( $path_info, 'template', $flav_ext );
+    my $vars            = {
         entries => $self->entries->filtered,
         flavour => $flavour,
     };
 
-    $plugins->run_plugins('templatize', \$template, $vars);
+    $plugins->run_plugins('templatize', \$content_type, \$template, $vars);
 
     my $output = $self->interpolate( $template, $vars );
 
     $plugins->run_plugins('output', \$output);
 
+    $self->res->headers->header('Content-Type' => $content_type);
     $self->res->body( $output );
 }
 
