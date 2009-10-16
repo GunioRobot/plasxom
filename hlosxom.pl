@@ -1693,7 +1693,7 @@ sub filename {
     }
 }
 
-sub path_info {
+sub fullpath {
     my $self = shift;
 
     my $path        = $self->path       || q{};

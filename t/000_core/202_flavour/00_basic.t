@@ -33,4 +33,4 @@ is( $flavour->filename, 'filename' );
 
 $flavour->flavour('html');
 
-is( $flavour->path_info, 'foo/bar/filename.html' );
+is( $flavour->fullpath, 'foo/bar/filename.html' );
