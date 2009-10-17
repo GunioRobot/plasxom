@@ -222,9 +222,9 @@ sub setup_engine {
 }
 
 sub handler {
-    my ( $class, $env ) = @_;
+    my ( $env ) = @_;
 
-    my $app = $class->new;
+    my $app = __PACKAGE__->new;
        $app->req( Plack::Request->new($env) );
        $app->res( Plack::Response->new );
        $app->res->status(200);
