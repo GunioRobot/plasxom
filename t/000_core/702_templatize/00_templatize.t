@@ -28,7 +28,7 @@ require_hlosxom;
                     \q{text/plain;},
                     {
                         entries => [qw( foo bar baz )],
-                        flavour => hlosxom::flavour->new( flavour => 'atom' ),
+                        flavour => hlosxom::flavour->new( flavour => 'atom', path_info => '/foo/bar/baz.atom' ),
                     }
                 ]
             );
@@ -51,7 +51,7 @@ require_hlosxom;
 }
 
 my $app = hlosxom->new;
-   $app->flavour( hlosxom::flavour->new( flavour => 'atom' ) );
+   $app->flavour( hlosxom::flavour->new( flavour => 'atom', path_info => '/foo/bar/baz.atom' ) );
    $app->plugins( plugins->new );
    $app->entries( entries->new );
    $app->methods->{'template'}      = sub {
@@ -67,12 +67,12 @@ my $app = hlosxom->new;
         my ( $app, $template, $vars ) = @_;
         is_deeply(
             [ $template, $vars ],
-            [ 'text/plain;', { entries => [qw( foo bar baz )], flavour => hlosxom::flavour->new( flavour => 'atom' ), } ],
+            [ 'text/plain;', { entries => [qw( foo bar baz )], flavour => hlosxom::flavour->new( flavour => 'atom', path_info => '/foo/bar/baz.atom' ), } ],
         );
 
         return 'bar';
    };
-   $app->req( HTTP::Engine::Test::Request->new( uri => 'http://localhost/foo/bar/baz.atom', method => 'GET', headers => [ PATH_INFO => '/foo/bar/baz.atom' ] ) );
+   $app->req( HTTP::Engine::Test::Request->new( uri => 'http://localhost/foo/bar/baz.atom', method => 'GET', env => [ PATH_INFO => '/foo/bar/baz.atom' ] ) );
    $app->res( HTTP::Engine::Response->new );
    $app->templatize;
    

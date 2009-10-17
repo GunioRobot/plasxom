@@ -23,7 +23,7 @@ require_hlosxom;
 
         is_deeply(
             [ @plugins::args ],
-            [ hlosxom::flavour->new( no_matched => 1, flavour => 'atom', url => 'http://localhost/foo/bar.html' ) ],
+            [ hlosxom::flavour->new( no_matched => 1, flavour => 'atom', url => 'http://localhost/', path_info => '/foo/bar.html' ) ],
         );
     }
 }
@@ -47,5 +47,5 @@ my $app = hlosxom->new;
 
 is_deeply(
     $app->flavour,
-    hlosxom::flavour->new( no_matched => 1, flavour => 'atom', url => 'http://localhost/foo/bar.html' ),
+    hlosxom::flavour->new( no_matched => 1, flavour => 'atom', url => 'http://localhost/', path_info => '/foo/bar.html' ),
 );

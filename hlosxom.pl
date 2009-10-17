@@ -303,7 +303,7 @@ sub prepare_entries {
     my $path = $flavour->path;
        $path = q{}        if ( ! defined $path );
        $path = "${path}/" if ( $path ne q{} );
-       $path .= $flavour->filename if ( $flavour->filename ne q{} );
+       $path .= $flavour->filename if ( defined $flavour->filename && $flavour->filename ne q{} );
     $args{'path'} = $path;
 
     # meta
@@ -365,7 +365,7 @@ sub templatize {
     my $flavour     = $self->flavour;
     my $plugins     = $self->plugins;
 
-    my $path_info   = $self->req->headers->header('PATH_INFO') || q{};
+    my $path_info   = $flavour->path_info || q{};
     my $flav_ext    = $flavour->flavour;
 
     my $content_type    = $self->template( $path_info, 'content_type', $flav_ext ) || 'text/plain; charset=UTF-8';
@@ -1708,7 +1708,7 @@ sub new {
     return $self;
 }
 
-for my $prop (qw( year month day flavour tags meta no_matched pagename tag_op page stash )) {
+for my $prop (qw( year month day flavour tags meta no_matched pagename tag_op page stash path_info )) {
     no strict 'refs';
     *{$prop} = sub {
         my $self = shift;
@@ -1847,17 +1847,54 @@ sub dispatch {
     my ( $self, $req ) = @_;
 
     my $flavour     = hlosxom::flavour->new;
-    my $path_info   = $req->header('PATH_INFO') || q{};
+    my $path_info   = q{};
+    my $uri         = q{};
+
+    if ( exists $INC{'HTTP/Engine/MinimalCGI.pm'} ) {
+        my $https = 0;
+        if ( exists $ENV{'HTTPS'} && uc($ENV{'HTTPS'}) eq 'ON') {
+            $https = 1;
+        }
+        elsif ( exists $ENV{'SERVER_PORT'} && $ENV{'SERVER_PORT'} == 433 ) {
+            $https = 1;
+        }
+
+        $uri     = ( $https ) ? 'https' : 'http' ;
+        $uri    .= '://';
+        $uri    .= $ENV{'HTTP_HOST'} || $ENV{'SERVER_NAME'};
+
+        my $basepath;
+        if ( exists $ENV{'REDIRECT_URL'} ) {
+            $basepath = $ENV{'REDIRECT_URL'};
+            $basepath =~ s/$ENV{'PATH_INFO'}// if ( exists $ENV{'PATH_INFO'} );
+        }
+        else {
+            $basepath = $ENV{'SCRIPT_NAME'} || '/';
+        }
+
+        $path_info  = $ENV{'PATH_INFO'} || q{};
+
+        $basepath   .= "/${path_info}";
+        $uri        .= "/${basepath}";
+    }
+    else {
+        $path_info  = $req->path_info;
+        $uri        = $req->uri;
+    }
 
     # url
-    my $uri = $req->uri;
     my $url = "$uri";
 
     my $len = length($path_info);
     my $frg = substr( $url, -$len );
     substr( $url, -$len ) = q{} if ( $frg eq $path_info );
 
+    $url =~ s{/+}{/}g;
+
     $flavour->url( $url );
+
+    # path_info
+    $flavour->path_info( $path_info );
 
     # path
     RULES: for my $rule ( @{ $self->rules } ) {

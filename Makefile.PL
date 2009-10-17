@@ -22,6 +22,7 @@ test_requires 'Time::Local';
 test_requires 'File::stat';
 test_requires 'File::Temp';
 test_requires 'HTTP::Request';
+test_requires 'HTTP::Request::AsCGI';
 test_requires 'Test::Warn';
 test_requires 'HTTP::Engine::Test::Request';
 
