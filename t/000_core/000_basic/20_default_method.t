@@ -38,7 +38,7 @@ my $tmpl = hlosxom->template('bar/baz', 'foo', 'html');
 
 is( $tmpl, 'foo' );
 
-$tmpl = hlosxom->template('bar/baz/foo/bar', 'bar', 'html');
+$tmpl = hlosxom->template('bar/baz/foo/bar/', 'bar', 'html');
 
 is( $tmpl, 'bar' );
 

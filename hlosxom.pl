@@ -64,6 +64,9 @@ __PACKAGE__->methods({
            $dir    = Path::Class::dir($dir);
 
            $path ||= q{};
+           $path =~ s{/+}{/}g;
+           $path =~ s{^/}{};
+           $path =~ s{/$}{};
 
             do {
                 my $file = $dir->file($path, "${chunk}.${flavour}");
