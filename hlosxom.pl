@@ -11,7 +11,7 @@ use Carp ();
 use Plack::Request;
 use Plack::Response;
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 my %stash = ();
 for my $property ( qw( config plugins methods vars cache entries entries_schema_class server dispatcher api ) ) {
