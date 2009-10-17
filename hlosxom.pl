@@ -1862,9 +1862,8 @@ sub dispatch {
             $https = 1;
         }
 
-        $uri     = ( $https ) ? 'https' : 'http' ;
-        $uri    .= '://';
-        $uri    .= $ENV{'HTTP_HOST'} || $ENV{'SERVER_NAME'};
+        my $scheme = ( $https ) ? 'https' : 'http';
+        my $host   = $ENV{'HTTP_HOST'} || $ENV{'SERVER_NAME'};
 
         my $basepath;
         if ( exists $ENV{'REDIRECT_URL'} ) {
@@ -1878,7 +1877,11 @@ sub dispatch {
         $path_info  = $ENV{'PATH_INFO'} || q{};
 
         $basepath   .= "/${path_info}";
-        $uri        .= "/${basepath}";
+        $basepath    =~ s{/+}{/}g;
+        $basepath    =~ s{^/}{};
+
+
+        $uri        = "${scheme}://${host}/${basepath}";
     }
     else {
         $path_info  = $req->path_info;
@@ -1891,8 +1894,6 @@ sub dispatch {
     my $len = length($path_info);
     my $frg = substr( $url, -$len );
     substr( $url, -$len ) = q{} if ( $frg eq $path_info );
-
-    $url =~ s{/+}{/}g;
 
     $flavour->url( $url );
 
