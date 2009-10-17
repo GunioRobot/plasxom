@@ -8,6 +8,8 @@ package hlosxom;
 use Text::MicroTemplate ();
 use Path::Class ();
 use Carp ();
+use Plack::Request;
+use Plack::Response;
 
 our $VERSION = '0.01';
 
@@ -205,38 +207,32 @@ sub setup_engine {
 
     my %config      = %{ $class->config->{'server'} || {} };
 
-    my $interface   = delete $config{'interface'} or Carp::croak "Server engine is not specified.";
+    my $interface   = delete $config{'interface'} or Carp::croak "Server interface is not specified.";
+    my $middleware  = delete $config{'middleware'} || [];
     my %args        = %config;
 
-    if ( $interface eq 'MinimalCGI' ) {
-        require HTTP::Engine::MinimalCGI;
-    }
-    else {
-        require HTTP::Engine;
+    Carp::croak "config->{'server'}->{'middleware'} is not ARRAY reference." if ( ref $middleware ne 'ARRAY' );
+    my $count = 0;
+    for my $mw ( @{ $middleware } ) {
+        Carp::croak "config->{'server'}->{'middleware'}->[${count}] is not ARRAY reference. middleware example: [ \$middlware, \@args ]"
+            if ( ref $mw ne 'ARRAY' );
     }
 
-    my $engine = HTTP::Engine->new(
-        interface => {
-            module          => $interface,
-            args            => { %args },
-            request_handler => sub { return $class->handler( @_ ) },
-        },
-    );
-
-    $class->server( $engine );
+    $class->server( { interface => $interface, middleware => $middleware, args => { %args } } );
 }
 
 sub handler {
-    my ( $class, $req ) = @_;
+    my ( $class, $env ) = @_;
 
     my $app = $class->new;
-       $app->req( $req );
-       $app->res( HTTP::Engine::Response->new );
+       $app->req( Plack::Request->new($env) );
+       $app->res( Plack::Response->new );
+       $app->res->status(200);
        $app->plugins->context( $app );
 
     $app->run;
 
-    return $app->res;
+    return $app->res->finalize;
 }
 
 sub new {
@@ -1850,43 +1846,8 @@ sub dispatch {
     my ( $self, $req ) = @_;
 
     my $flavour     = hlosxom::flavour->new;
-    my $path_info   = q{};
-    my $uri         = q{};
-
-    if ( exists $INC{'HTTP/Engine/MinimalCGI.pm'} ) {
-        my $https = 0;
-        if ( exists $ENV{'HTTPS'} && uc($ENV{'HTTPS'}) eq 'ON') {
-            $https = 1;
-        }
-        elsif ( exists $ENV{'SERVER_PORT'} && $ENV{'SERVER_PORT'} == 433 ) {
-            $https = 1;
-        }
-
-        my $scheme = ( $https ) ? 'https' : 'http';
-        my $host   = $ENV{'HTTP_HOST'} || $ENV{'SERVER_NAME'};
-
-        my $basepath;
-        if ( exists $ENV{'REDIRECT_URL'} ) {
-            $basepath = $ENV{'REDIRECT_URL'};
-            $basepath =~ s/$ENV{'PATH_INFO'}// if ( exists $ENV{'PATH_INFO'} );
-        }
-        else {
-            $basepath = $ENV{'SCRIPT_NAME'} || '/';
-        }
-
-        $path_info  = $ENV{'PATH_INFO'} || q{};
-
-        $basepath   .= "/${path_info}";
-        $basepath    =~ s{/+}{/}g;
-        $basepath    =~ s{^/}{};
-
-
-        $uri        = "${scheme}://${host}/${basepath}";
-    }
-    else {
-        $path_info  = $req->path_info;
-        $uri        = $req->uri;
-    }
+    my $path_info   = $req->path_info || q{};
+    my $uri         = $req->uri;
 
     # url
     my $url = "$uri";
@@ -2103,9 +2064,36 @@ sub format_tags {
 
 package main;
 
-if ( hlosxom::util::env_value('bootstrap') ) {
+use Plack::Builder;
+use Plack::Loader;
+
+my $bootstrap   = hlosxom::util::env_value('bootstrap');
+my $psgi        = hlosxom::util::env_value('psgi');
+
+if ( $bootstrap || $psgi ) {
     hlosxom->setup;
-    hlosxom->server->run;
+
+    my %config  = %{ hlosxom->server };
+    my $server  = delete $config{'interface'} or die "hlosxom->server->{'interface'} is not specified.";
+    my $mws     = delete $config{'middleware'} || [];
+    my %args    = %{ delete $config{'args'} || {} };
+
+    my $app     = hlosxom->can('handler');
+
+    if ( $bootstrap ) {
+        $app = builder {
+            for my $mw ( @{ $mws } ) {
+                enable( @{ $mw } );
+            }
+            return $app;
+        };
+
+        Plack::Loader->load( $server, %args )->run( $app );
+    }
+    elsif ( $psgi ) {
+        return $app;
+    }
+
 }
 
 1;

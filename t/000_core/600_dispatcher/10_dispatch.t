@@ -5,7 +5,7 @@ use warnings;
 
 use t::Util qw( require_hlosxom );
 use Test::More tests => 1 + 6 + 2 + 8 + 1;
-use HTTP::Engine::Test::Request;
+use Plack::Request;
 
 require_hlosxom;
 
@@ -17,7 +17,7 @@ my $dispatcher = hlosxom::dispatcher->new(
                 method      => 'POST',
                 function    => sub {
                     my ( $req ) = @_;
-                    isa_ok( $req, 'HTTP::Engine::Request' );
+                    isa_ok( $req, 'Plack::Request' );
                     return 1;
                 },
             },
@@ -31,7 +31,7 @@ my $dispatcher = hlosxom::dispatcher->new(
             },
             after_hook  => sub {
                 my ( $req, $flav ) = @_;
-                isa_ok( $req, 'HTTP::Engine::Request' );
+                isa_ok( $req, 'Plack::Request' );
                 isa_ok( $flav, 'hlosxom::flavour' );
             },
         },
@@ -42,7 +42,7 @@ my $dispatcher = hlosxom::dispatcher->new(
     },
 );
 
-my $req     = HTTP::Engine::Test::Request->new( uri => 'http://localhost/2009/01/10.html', method => 'POST', env => [ PATH_INFO => '/2009/01/10.html' ] );
+my $req     = Plack::Request->new({ 'psgi.url_scheme' => 'http', HTTP_HOST => 'localhost', PATH_INFO => '/2009/01/10.html', REQUEST_METHOD => 'POST', });
 my $flav    = $dispatcher->dispatch( $req );
 
 is( $flav->url, 'http://localhost' );
@@ -52,7 +52,7 @@ is( $flav->month, '01' );
 is( $flav->day, 10 );
 is( $flav->flavour, 'html' );
 
-$req    = HTTP::Engine::Test::Request->new( uri => 'http://localhost/nyarla/2008/02/21/3.json', method => 'GET', env => [ PATH_INFO => '/nyarla/2008/02/21/3.json' ] );
+$req     = Plack::Request->new({ 'psgi.url_scheme' => 'http', HTTP_HOST => 'localhost', PATH_INFO => '/nyarla/2008/02/21/3.json', REQUEST_METHOD => 'GET', });
 $flav   = $dispatcher->dispatch( $req );
 
 is( $flav->url, 'http://localhost' );
@@ -76,7 +76,7 @@ is_deeply(
     }
 );
 
-$req    = HTTP::Engine::Test::Request->new( uri => 'http://localhost/foo/bar/baz.html', method => 'GET', headers => [ PATH_INFO => '/foo/bar/baz.html' ] );
+$req     = Plack::Request->new({ 'psgi.url_scheme' => 'http', HTTP_HOST => 'localhost', PATH_INFO => '/foo/bar/baz.html', REQUEST_METHOD => 'GET', });
 $flav   = $dispatcher->dispatch( $req );
 
 ok( $flav->no_matched );

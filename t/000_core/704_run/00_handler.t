@@ -6,8 +6,6 @@ use warnings;
 use t::Util qw( require_hlosxom );
 use Test::More tests => 4;
 
-use HTTP::Request;
-
 BEGIN { require_hlosxom; }
 
 {
@@ -22,8 +20,8 @@ BEGIN { require_hlosxom; }
         package main;
         my $hlosxom = $hlosxom::app;
 
-        isa_ok( $hlosxom->req, 'HTTP::Engine::Request' );
-        isa_ok( $hlosxom->res, 'HTTP::Engine::Response' );
+        isa_ok( $hlosxom->req, 'Plack::Request' );
+        isa_ok( $hlosxom->res, 'Plack::Response' );
     };
 
     package plugins;
@@ -39,13 +37,20 @@ BEGIN { require_hlosxom; }
 
 hlosxom->config->merge(
     server => {
-        interface => 'Test',
+        interface => 'CGI',
     },
 );
 
 hlosxom->setup_engine;
 hlosxom->plugins( plugins->new );
 
-my $res = hlosxom->server->run( HTTP::Request->new( GET => 'http://localhost/' ) );
+my $res = hlosxom->handler( { 'psgi.scheme' => 'http', HTTP_HOST => 'localhost', PATH_INFO => '/', REQUEST_METHOD => 'GET' } );
 
-is( $res->content, 'hello world!' );
+is_deeply(
+    $res,
+    [
+        200,
+        [],
+        ['hello world!'],
+    ]
+);

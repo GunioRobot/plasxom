@@ -10,13 +10,25 @@ require_hlosxom;
 
 hlosxom->config->merge(
     server => {
-        interface => 'MinimalCGI',
+        interface => 'CGI',
+        middleware  => [
+            [ 'Plack::Middleware::foo', 'foo' => 'bar' ],
+        ],
+        foobar  => 'baz',
     },
 );
 
 hlosxom->setup_engine;
 
-isa_ok(
+is_deeply(
     hlosxom->server,
-    'HTTP::Engine',
+    {
+        interface => 'CGI',
+        middleware => [
+            [ 'Plack::Middleware::foo', foo => 'bar' ],
+        ],
+        args    => {
+            foobar => 'baz',
+        }
+    }
 );

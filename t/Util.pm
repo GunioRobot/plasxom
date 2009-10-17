@@ -28,6 +28,7 @@ our @EXPORT_OK = qw(
 
 sub require_hlosxom {
     local $ENV{'HLOSXOM_BOOTSTRAP'} = 0;
+    local $ENV{'HLOSXOM_PSGI'}      = 0;
     require $script;
 }
 

@@ -5,8 +5,8 @@ use warnings;
 
 use t::Util qw( require_hlosxom );
 use Test::More tests => 11;
-use HTTP::Engine::Test::Request;
-use HTTP::Engine::Response;
+use Plack::Request;
+use Plack::Response;
 
 require_hlosxom;
 
@@ -72,8 +72,8 @@ my $app = hlosxom->new;
 
         return 'bar';
    };
-   $app->req( HTTP::Engine::Test::Request->new( uri => 'http://localhost/foo/bar/baz.atom', method => 'GET', env => [ PATH_INFO => '/foo/bar/baz.atom' ] ) );
-   $app->res( HTTP::Engine::Response->new );
+   $app->req( Plack::Request->new({ 'psgi.url_scheme' => 'http', HTTP_HOST => 'localhost', PATH_INFO => '/foo/bar/baz.atom', REQUEST_METHOD => 'GET', }) );
+   $app->res( Plack::Response->new );
    $app->templatize;
    
    is( $app->res->headers->header('Content-Type'), 'text/plain;' );

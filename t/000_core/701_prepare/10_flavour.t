@@ -4,7 +4,7 @@ use strict;
 use warnings;
 
 use t::Util qw( require_hlosxom );
-use HTTP::Engine::Test::Request;
+use Plack::Request;
 use Test::More tests => 4;
 
 require_hlosxom;
@@ -41,7 +41,7 @@ hlosxom->config->merge(
 hlosxom->setup_dispatcher;
 
 my $app = hlosxom->new;
-   $app->req( HTTP::Engine::Test::Request->new( uri => 'http://localhost/foo/bar.html', method => 'GET' ) );
+   $app->req( Plack::Request->new({ 'psgi.url_scheme' => 'http', HTTP_HOST => 'localhost', PATH_INFO => '/foo/bar.html', REQUEST_METHOD => 'GET', }) );
    $app->plugins( plugins->new );
    $app->prepare_flavour;
 
