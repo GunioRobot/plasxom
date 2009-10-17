@@ -61,8 +61,8 @@ require_hlosxom;
     1;
 }
 
-local $INC{'TestCacheClassA'} = $0;
-local $INC{'TestCacheClassB'} = $0;
+local $INC{'TestCacheClassA.pm'} = $0;
+local $INC{'TestCacheClassB.pm'} = $0;
 
 # new
 my $cache = hlosxom::cache->new(
