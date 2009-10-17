@@ -7,10 +7,18 @@ my $basedir = '/path/to/script/dir';
 
 return {
 
+    server      => {
+        interface   => 'CGI',
+        middleware  => [
+            [ 'Plack::Middleware::StackTrace' ],
+        ],
+    },
+
     flavour     => {
         dir     => "${basedir}/flavours",
         default => 'html',
     },
+
 
     # cache       => {
     #     class   => 'Ccahe::FileCache',
@@ -47,7 +55,7 @@ return {
     },
 
     vars        => {
-    # foo => 'bar',
+        # foo => 'bar',
     },
 
     dispatch    => {
