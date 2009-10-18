@@ -1327,7 +1327,10 @@ sub index  {
 sub parse {
     my ( $self, $text ) = @_;
     my @lines = split m{\n}, $text;
-    my %data;
+    my %data = (
+        meta => {},
+        tags => [],
+    );
 
     # parse title
     my $title = shift @lines;
