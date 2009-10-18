@@ -1407,14 +1407,17 @@ sub build {
         if ( defined( my $value = delete $args{$prop} ) ) {
             if ( $prop eq 'created' ) {
                 $value = $dateformatter->( $value );
+                $meta{$key} = $value;
             }
             elsif ( $prop eq 'tags' ) {
                 my $tags = $value;
                 Carp::croak "Argument 'tags' is not ARRAy reference." if ( ref $tags ne 'ARRAY' );
                 $value = $tagformatter->( @{ $tags } );
+                $meta{$key} = $value if ( @{ $tags } > 0 );
             }
-
-            $meta{$key} = $value;
+            else {
+                $meta{$key} = $value;
+            }
         }
     }
 
