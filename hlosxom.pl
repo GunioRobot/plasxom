@@ -641,6 +641,33 @@ sub run_plugin_first {
 
 1;
 
+package hlosxom::plugin;
+
+use Carp ();
+
+sub new {
+    my ( $class, %args ) = @_;
+
+    my $config = delete $args{'config'} || {};
+    my $state  = delete $args{'state'} or Carp::croak "Argument 'state' is not specified.";
+
+    my $self = bless {
+        config => $config,
+        state  => $state,
+    }, $class;
+
+    $self->init;
+
+    return $self;
+}
+
+sub config  { $_[0]->{'config'} }
+sub state   { $_[0]->{'state'}  }
+
+sub init  { 1 }
+sub setup { 1 }
+sub start { 1 }
+
 package hlosxom::entries;
 
 use Carp ();
