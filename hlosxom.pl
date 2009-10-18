@@ -1865,6 +1865,8 @@ sub dispatch {
     $flavour->url( $url );
 
     # path_info
+    my $script = $req->env->{'SCRIPT_NAME'} || q{};
+       $path_info =~ s{$script}{};
     $flavour->path_info( $path_info );
 
     # path
