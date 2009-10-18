@@ -44,7 +44,7 @@ hlosxom->config->merge(
 hlosxom->setup_engine;
 hlosxom->plugins( plugins->new );
 
-my $res = hlosxom->handler( { 'psgi.scheme' => 'http', HTTP_HOST => 'localhost', PATH_INFO => '/', REQUEST_METHOD => 'GET' } );
+my $res = &hlosxom::handler( { 'psgi.scheme' => 'http', HTTP_HOST => 'localhost', PATH_INFO => '/', REQUEST_METHOD => 'GET' } );
 
 is_deeply(
     $res,
