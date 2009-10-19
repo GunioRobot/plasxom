@@ -2107,9 +2107,7 @@ if ( ! $libmode ) {
     hlosxom->setup;
 
     my %config  = %{ hlosxom->server };
-    my $server  = delete $config{'interface'} or die "hlosxom->server->{'interface'} is not specified.";
     my $mws     = delete $config{'middleware'} || [];
-    my %args    = %{ delete $config{'args'} || {} };
 
     my $app     = builder {
         for my $mw ( @{ $mws } ) {
