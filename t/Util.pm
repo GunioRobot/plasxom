@@ -19,7 +19,7 @@ our @EXPORT_OK = qw(
     while ( my $dir = pop @path ) {
         if ( $dir eq 't' ) {
             $basedir    = dir(@path);
-            $script     = $basedir->file('hlosxom.pl');
+            $script     = $basedir->file('hlosxom.psgi');
             $plugindir  = $basedir->subdir('plugins');
             $example    = $basedir->subdir('t', 'examples');
             last;
@@ -28,8 +28,7 @@ our @EXPORT_OK = qw(
 }
 
 sub require_hlosxom {
-    local $ENV{'HLOSXOM_BOOTSTRAP'} = 0;
-    local $ENV{'HLOSXOM_PSGI'}      = 0;
+    local $ENV{'HLOSXOM_LIBMODE'} = 1;
     require $script;
 }
 

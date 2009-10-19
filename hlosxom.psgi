@@ -2103,12 +2103,10 @@ sub format_tags {
 package main;
 
 use Plack::Builder;
-use Plack::Loader;
 
-my $bootstrap   = hlosxom::util::env_value('bootstrap');
-my $psgi        = hlosxom::util::env_value('psgi');
+my $libmode = hlosxom::util::env_value('libmode');
 
-if ( $bootstrap || $psgi ) {
+if ( ! $libmode ) {
     hlosxom->setup;
 
     my %config  = %{ hlosxom->server };
@@ -2116,22 +2114,14 @@ if ( $bootstrap || $psgi ) {
     my $mws     = delete $config{'middleware'} || [];
     my %args    = %{ delete $config{'args'} || {} };
 
-    my $app     = hlosxom->can('handler');
+    my $app     = builder {
+        for my $mw ( @{ $mws } ) {
+            enable( @{ $mw } );
+        }
+        return hlosxom->can('handler');
+    };
 
-    if ( $bootstrap ) {
-        $app = builder {
-            for my $mw ( @{ $mws } ) {
-                enable( @{ $mw } );
-            }
-            return $app;
-        };
-
-        Plack::Loader->load( $server, %args )->run( $app );
-    }
-    elsif ( $psgi ) {
-        return $app;
-    }
-
+    return $app;
 }
 
 1;

@@ -6,7 +6,7 @@ use warnings;
 use t::Util qw( require_hlosxom );
 use Test::More;
 
-use Time::Local
+use Time::Local;
 
 require_hlosxom;
 
