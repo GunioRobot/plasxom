@@ -10,7 +10,7 @@ require_hlosxom;
 
 my @props = qw( year month day flavour tags meta no_matched pagename tag_op page flavour path_info );
 
-plan tests => 1 + 1 + scalar(@props) + 3;
+plan tests => 1 + 1 + 1 + scalar(@props) + 3;
 
 my $flavour = hlosxom::flavour->new();
 
@@ -22,6 +22,8 @@ for my $prop ( @props ) {
     $flavour->$prop('foo');
     is( $flavour->$prop, 'foo' );
 }
+
+is( $flavour->fullpath, '' );
 
 $flavour->path('/foo/bar/');
 
