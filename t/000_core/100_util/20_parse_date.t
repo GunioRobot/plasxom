@@ -3,12 +3,12 @@
 use strict;
 use warnings;
 
-use t::Util qw( require_hlosxom );
+use t::Util qw( require_plasxom );
 use Test::More;
 
 use Time::Local;
 
-require_hlosxom;
+require_plasxom;
 
 my %date   = (
     '2009'                    => 1230768000 - timegm(localtime 0),
@@ -22,9 +22,9 @@ my %date   = (
 
 plan tests => 1 + scalar(keys %date);
 
-can_ok( 'hlosxom::util', 'parse_date' );
+can_ok( 'plasxom::util', 'parse_date' );
 
-my $method = hlosxom::util->can('parse_date');
+my $method = plasxom::util->can('parse_date');
 
 for my $source ( keys %date ) {
     is( $method->($source), $date{$source} );

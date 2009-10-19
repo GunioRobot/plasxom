@@ -3,13 +3,13 @@
 use strict;
 use warnings;
 
-use t::Util qw( require_hlosxom );
+use t::Util qw( require_plasxom );
 use Test::More tests => 1 + 6 + 2 + 8 + 1;
 use Plack::Request;
 
-require_hlosxom;
+require_plasxom;
 
-my $dispatcher = hlosxom::dispatcher->new(
+my $dispatcher = plasxom::dispatcher->new(
     rule => [
         {
             path        => '/{year}/{month}/{day}(?:[.]{flavour})',
@@ -32,7 +32,7 @@ my $dispatcher = hlosxom::dispatcher->new(
             after_hook  => sub {
                 my ( $req, $flav ) = @_;
                 isa_ok( $req, 'Plack::Request' );
-                isa_ok( $flav, 'hlosxom::flavour' );
+                isa_ok( $flav, 'plasxom::flavour' );
             },
         },
     ],

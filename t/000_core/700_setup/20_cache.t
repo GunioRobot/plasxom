@@ -3,15 +3,15 @@
 use strict;
 use warnings;
 
-use t::Util qw( require_hlosxom );
+use t::Util qw( require_plasxom );
 use Test::More tests => 2;
 
-require_hlosxom;
+require_plasxom;
 
-hlosxom->config( hlosxom::hash->new( cache => {} ) );
+plasxom->config( plasxom::hash->new( cache => {} ) );
 
-hlosxom->setup_cache;
+plasxom->setup_cache;
 
-isa_ok( hlosxom->cache, 'hlosxom::cache' );
+isa_ok( plasxom->cache, 'plasxom::cache' );
 
-isa_ok( hlosxom->cache->{'cache'}, 'hlosxom::cache::memory' );
+isa_ok( plasxom->cache->{'cache'}, 'plasxom::cache::memory' );

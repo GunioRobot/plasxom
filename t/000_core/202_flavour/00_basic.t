@@ -3,18 +3,18 @@
 use strict;
 use warnings;
 
-use t::Util qw( require_hlosxom );
+use t::Util qw( require_plasxom );
 use Test::More;
 
-require_hlosxom;
+require_plasxom;
 
 my @props = qw( year month day flavour tags meta no_matched pagename tag_op page flavour path_info );
 
 plan tests => 1 + 1 + 1 + scalar(@props) + 3;
 
-my $flavour = hlosxom::flavour->new();
+my $flavour = plasxom::flavour->new();
 
-isa_ok( $flavour, 'hlosxom::flavour' );
+isa_ok( $flavour, 'plasxom::flavour' );
 
 can_ok( $flavour, @props );
 

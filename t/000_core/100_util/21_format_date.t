@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use t::Util qw( require_hlosxom );
+use t::Util qw( require_plasxom );
 use Test::More tests => 2;
 
 use Time::Local;
@@ -19,10 +19,10 @@ else {
     $tz = sprintf("%+03d:%02d", $zh, $zm);
 }
 
-require_hlosxom;
+require_plasxom;
 
-can_ok('hlosxom::util', 'format_date');
+can_ok('plasxom::util', 'format_date');
 
-my $method = hlosxom::util->can('format_date');
+my $method = plasxom::util->can('format_date');
 
 is( $method->( 1230735600 ),  "2009-01-01T00:00:00${tz}" );

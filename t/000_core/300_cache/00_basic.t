@@ -3,10 +3,10 @@
 use strict;
 use warnings;
 
-use t::Util qw( require_hlosxom );
+use t::Util qw( require_plasxom );
 use Test::More tests => ( 1 + 2 ) + 2 + 2 + 1 + 2;
 
-require_hlosxom;
+require_plasxom;
 
 {
     package TestCacheClassA;
@@ -65,14 +65,14 @@ local $INC{'TestCacheClassA.pm'} = $0;
 local $INC{'TestCacheClassB.pm'} = $0;
 
 # new
-my $cache = hlosxom::cache->new(
+my $cache = plasxom::cache->new(
     class   => 'TestCacheClassA',
     args    => {
         foo => 'bar',
     },
 );
 
-isa_ok( $cache, 'hlosxom::cache' );
+isa_ok( $cache, 'plasxom::cache' );
 isa_ok( $cache->{'cache'}, 'TestCacheClassA' );
 
 # set
@@ -83,7 +83,7 @@ is( $cache->get('foo'), 'bar' );
 
 # new 2
 
-$cache = hlosxom::cache->new(
+$cache = plasxom::cache->new(
     class => 'TestCacheClassB',
     args => {
         foo => 'bar',
@@ -93,9 +93,9 @@ $cache = hlosxom::cache->new(
 
 # new 3
 
-$cache = hlosxom::cache->new;
+$cache = plasxom::cache->new;
 
-isa_ok( $cache->{'cache'}, 'hlosxom::cache::memory' );
+isa_ok( $cache->{'cache'}, 'plasxom::cache::memory' );
 
 $cache->set( foo => 'bar' );
 

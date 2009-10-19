@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use t::Util qw( require_hlosxom $example );
+use t::Util qw( require_plasxom $example );
 use File::stat;
 use File::Temp;
 use Test::Warn;
@@ -14,7 +14,7 @@ use Test::More
            + 1;
 
 
-BEGIN { require_hlosxom }
+BEGIN { require_plasxom }
 
 my $datadir = $example->subdir('core/entries/blosxom')->absolute->cleanup;
 
@@ -26,9 +26,9 @@ my %args = (
 );
 
 # new test
-my $db = hlosxom::entries::blosxom->new( %args );
+my $db = plasxom::entries::blosxom->new( %args );
 
-isa_ok( $db, 'hlosxom::entries::blosxom' );
+isa_ok( $db, 'plasxom::entries::blosxom' );
 
 isa_ok( $db->entries_dir, 'Path::Class::Dir' );
 is( $db->file_extension, 'txt' );
@@ -56,21 +56,21 @@ is_deeply(
 is_deeply(
     $db->{'parser'},
     {
-        date    => hlosxom::util->can('parse_date'),
-        tag     => hlosxom::util->can('parse_tags'),
+        date    => plasxom::util->can('parse_date'),
+        tag     => plasxom::util->can('parse_tags'),
     },
 );
 
 is_deeply(
     $db->{'formatter'},
     {
-        date    => hlosxom::util->can('format_date'),
-        tag     => hlosxom::util->can('format_tags'),
+        date    => plasxom::util->can('format_date'),
+        tag     => plasxom::util->can('format_tags'),
     },
 );
 
 my $sub = sub{};
-$db = hlosxom::entries::blosxom->new(
+$db = plasxom::entries::blosxom->new(
     %args,
     meta_date_parser    => $sub,
     meta_date_formatter => $sub,
@@ -95,7 +95,7 @@ is_deeply(
 );
 
 # select, exists and index tests
-$db = hlosxom::entries::blosxom->new( %args, depth => 1 );
+$db = plasxom::entries::blosxom->new( %args, depth => 1 );
 
 # exists
 ok( $db->exists( path => 'foo' ) );
@@ -137,9 +137,9 @@ is_deeply(
 {
     my $temp = File::Temp->new();
 
-    $db = hlosxom::entries::blosxom->new(
+    $db = plasxom::entries::blosxom->new(
         use_cache   => 1,
-        cache       => 'hlosxom::cache'->new,
+        cache       => 'plasxom::cache'->new,
         use_index   => 1,
         index_file  => $temp->filename,
         %args,
@@ -149,7 +149,7 @@ is_deeply(
     $db->select( path => 'foo' );
 
     is_deeply(
-        $db->{'cache'}->{'cache'}->{'hlosxom-entries-blosxom:foo'},
+        $db->{'cache'}->{'cache'}->{'plasxom-entries-blosxom:foo'},
         {
             title           => 'title',
             body_source     => 'body',
@@ -164,7 +164,7 @@ is_deeply(
 
     $db->select( path => 'foo/bar' );
     is_deeply(
-        $db->{'cache'}->{'cache'}->{'hlosxom-entries-blosxom:foo/bar'},
+        $db->{'cache'}->{'cache'}->{'plasxom-entries-blosxom:foo/bar'},
         {
             title           => 'title',
             body_source     => 'body',
@@ -251,7 +251,7 @@ is_deeply(
 {
     my $temp = File::Temp->newdir;
 
-    my $db = hlosxom::entries::blosxom->new(
+    my $db = plasxom::entries::blosxom->new(
         %args,
         entries_dir => $temp->dirname,
         auto_update => 1,
@@ -298,7 +298,7 @@ is_deeply(
         $db->entries_dir->file('foo.txt')->slurp(),
           qq{title\n}
         . qq{\@bar: baz\n}
-        . qq{\@date: } . hlosxom::util::format_date( stat($db->entries_dir->file('foo.txt'))->mtime ) . "\n"
+        . qq{\@date: } . plasxom::util::format_date( stat($db->entries_dir->file('foo.txt'))->mtime ) . "\n"
         . qq{\@foo: bar\n}
         . qq{\@pagename: foobarbaz\n}
         . qq{\@summary: description\n}
@@ -328,6 +328,6 @@ is_deeply(
     ok( ! $db->exists( path => 'foo' ) );
 }
 
-$db = hlosxom::entries::blosxom->new( %args, readonly => 1 );
+$db = plasxom::entries::blosxom->new( %args, readonly => 1 );
 
 warning_is { $db->update( path => 'foo', title => 'updated' ) } 'Entries are readonly.';

@@ -3,13 +3,13 @@
 use strict;
 use warnings;
 
-use t::Util qw( require_hlosxom );
+use t::Util qw( require_plasxom );
 use Test::More tests => 4;
 
-BEGIN { require_hlosxom; }
+BEGIN { require_plasxom; }
 
 {
-    package hlosxom;
+    package plasxom;
 
     no strict 'refs';
     no warnings 'redefine';
@@ -18,10 +18,10 @@ BEGIN { require_hlosxom; }
         $app->res->body('hello world!');
 
         package main;
-        my $hlosxom = $hlosxom::app;
+        my $plasxom = $plasxom::app;
 
-        isa_ok( $hlosxom->req, 'Plack::Request' );
-        isa_ok( $hlosxom->res, 'Plack::Response' );
+        isa_ok( $plasxom->req, 'Plack::Request' );
+        isa_ok( $plasxom->res, 'Plack::Response' );
     };
 
     package plugins;
@@ -30,21 +30,21 @@ BEGIN { require_hlosxom; }
     sub context {
         our ( $self, $context ) = @_;
         package main;
-        isa_ok( $plugins::context, 'hlosxom' );
+        isa_ok( $plugins::context, 'plasxom' );
     }
 
 }
 
-hlosxom->config->merge(
+plasxom->config->merge(
     server => {
         interface => 'CGI',
     },
 );
 
-hlosxom->setup_engine;
-hlosxom->plugins( plugins->new );
+plasxom->setup_engine;
+plasxom->plugins( plugins->new );
 
-my $res = &hlosxom::handler( { 'psgi.scheme' => 'http', HTTP_HOST => 'localhost', PATH_INFO => '/', REQUEST_METHOD => 'GET' } );
+my $res = &plasxom::handler( { 'psgi.scheme' => 'http', HTTP_HOST => 'localhost', PATH_INFO => '/', REQUEST_METHOD => 'GET' } );
 
 is_deeply(
     $res,

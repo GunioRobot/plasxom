@@ -3,10 +3,10 @@
 use strict;
 use warnings;
 
-use t::Util qw( require_hlosxom );
+use t::Util qw( require_plasxom );
 use Test::More tests => 10;
 
-require_hlosxom;
+require_plasxom;
 
 {
     package TestEntries;
@@ -17,12 +17,12 @@ require_hlosxom;
     }
 }
 
-my $entries = hlosxom::entries->new(
+my $entries = plasxom::entries->new(
     schema      => 'TestEntries',
     foo         => 'bar',
 );
 
-isa_ok( $entries, 'hlosxom::entries' );
+isa_ok( $entries, 'plasxom::entries' );
 isa_ok( $entries->db, 'TestEntries' );
 
 is_deeply(
@@ -38,7 +38,7 @@ ok( $entries->indexed );
 
 is( $entries->num_entries, 5 );
 
-$entries = hlosxom::entries->new(
+$entries = plasxom::entries->new(
     schema => 'TestEntries',
     foo    => 'bar',
     num_entries => 10,

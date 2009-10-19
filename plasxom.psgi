@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-package hlosxom;
+package plasxom;
 
 use Text::MicroTemplate ();
 use Path::Class ();
@@ -51,18 +51,18 @@ for my $property (qw( request response flavour )) {
 *req = __PACKAGE__->can('request');
 *res = __PACKAGE__->can('response');
 
-__PACKAGE__->config( hlosxom::hash->new() );
+__PACKAGE__->config( plasxom::hash->new() );
 
-__PACKAGE__->vars( hlosxom::hash->new() );
+__PACKAGE__->vars( plasxom::hash->new() );
 
-__PACKAGE__->api( hlosxom::api->new() );
+__PACKAGE__->api( plasxom::api->new() );
 
 __PACKAGE__->methods({
     template    => sub {
         my ( $app, $path, $chunk, $flavour ) = @_;
 
         my $dir    = eval { $app->config->{'flavour'}->{'dir'} };
-        Carp::croak "hlosxom->config->{'flaovur'}->{'dir'} is not specified." if ( $@ );
+        Carp::croak "plasxom->config->{'flaovur'}->{'dir'} is not specified." if ( $@ );
            $dir    = Path::Class::dir($dir);
 
            $path ||= q{};
@@ -94,7 +94,7 @@ __PACKAGE__->methods({
     },
 });
 
-__PACKAGE__->entries_schema_class('hlosxom::entries::blosxom');
+__PACKAGE__->entries_schema_class('plasxom::entries::blosxom');
 
 sub setup {
     my ( $class ) = @_;
@@ -113,7 +113,7 @@ sub setup {
 sub setup_config {
     my ( $class ) =  @_;
 
-    my $file = hlosxom::util::env_value('config');
+    my $file = plasxom::util::env_value('config');
     my $conf = eval { require $file };
 
     die "Failed to load configuration file: $file: $@"      if ( $@ );
@@ -135,7 +135,7 @@ sub setup_cache {
 
     my $config = $class->config->{'cache'} || {};
 
-    $class->cache( hlosxom::cache->new( %{ $config } ) );
+    $class->cache( plasxom::cache->new( %{ $config } ) );
 }
 
 sub setup_plugins {
@@ -148,7 +148,7 @@ sub setup_plugins {
     my $state   = $config->{'plugin_state_dir'};
     my $order   = $class->config->{'plugins'};
 
-    my $plugins = hlosxom::plugins->new(
+    my $plugins = plasxom::plugins->new(
         search_dirs => $dirs,
         state_dir   => $state,
         order       => $order,
@@ -175,14 +175,14 @@ sub setup_methods {
 sub setup_entries {
     my ( $class ) = @_;
 
-    my $schema = $class->entries_schema_class || 'hlosxom::entries::blosxom';
+    my $schema = $class->entries_schema_class || 'plasxom::entries::blosxom';
     my %config = %{ $class->config->{'entries'} || {} };
 
     if ( exists $config{'use_cache'} && $config{'use_cache'} ) {
         $config{'cache'} = $class->cache;
     }
 
-    my $entries = hlosxom::entries->new(
+    my $entries = plasxom::entries->new(
         schema => $schema,
         %config,
     );
@@ -197,7 +197,7 @@ sub setup_dispatcher {
     my ( $class ) = @_;
 
     my %config = %{ $class->config->{'dispatch'} || {} };
-    my $dispatcher = hlosxom::dispatcher->new( %config );
+    my $dispatcher = plasxom::dispatcher->new( %config );
 
     $class->dispatcher( $dispatcher );
 }
@@ -390,7 +390,7 @@ sub finalize {
 
 1;
 
-package hlosxom::hash;
+package plasxom::hash;
 
 sub new {
     my $class = shift;
@@ -400,13 +400,13 @@ sub new {
 sub merge {
     my ( $self, %new ) = @_;
     my %base = %{ $self };
-    my $new = hlosxom::util::merge_hash( \%base, \%new );
+    my $new = plasxom::util::merge_hash( \%base, \%new );
     %{ $self } = %{ $new };
 }
 
 1;
 
-package hlosxom::api;
+package plasxom::api;
 
 use Carp;
 
@@ -435,21 +435,21 @@ sub call {
     return $function->( $instance, @args );
 }
 
-package hlosxom::cache;
+package plasxom::cache;
 
 use Carp ();
 
 sub new {
     my ( $class, %args ) = @_;
 
-    my $cache_class = delete $args{'class'} || 'hlosxom::cache::memory';
+    my $cache_class = delete $args{'class'} || 'plasxom::cache::memory';
     my $args  = delete $args{'args'};
     my $deref = ( !! $args{'deref'} ) ? 1 : 0 ;
 
     my $module_path = $cache_class . '.pm';
        $module_path =~ s{::}{/}g;
 
-    eval { require $module_path } if ( $cache_class ne 'hlosxom::cache::memory' );
+    eval { require $module_path } if ( $cache_class ne 'plasxom::cache::memory' );
     Carp::croak "Failed to load cache class: ${cache_class} => ${module_path}: $@" if ( $@ );
 
     my $cache;
@@ -479,7 +479,7 @@ sub get {
 
 1;
 
-package hlosxom::cache::memory;
+package plasxom::cache::memory;
 
 sub new {
     my ( $class ) = @_;
@@ -496,7 +496,7 @@ sub get {
     return $self->{$key};
 }
 
-package hlosxom::plugins;
+package plasxom::plugins;
 
 use Path::Class::Dir;
 use Carp ();
@@ -552,8 +552,8 @@ sub setup {
         my $config = $order->{'config'};
 
         my $package = $module;
-           $package =~ s{^hlosxom::plugin}{};
-           $package = "hlosxom::plugin::${package}";
+           $package =~ s{^plasxom::plugin}{};
+           $package = "plasxom::plugin::${package}";
 
         for my $dir ( @{ $self->search_dirs } ) {
             my $path = $dir->file($module);
@@ -638,7 +638,7 @@ sub run_plugin_first {
 
 1;
 
-package hlosxom::plugin;
+package plasxom::plugin;
 
 use Carp ();
 
@@ -665,7 +665,7 @@ sub init  { 1 }
 sub setup { 1 }
 sub start { 1 }
 
-package hlosxom::entries;
+package plasxom::entries;
 
 use Carp ();
 
@@ -741,7 +741,7 @@ sub index {
     my %entries = $self->db->index();
 
     for my $path ( keys %entries ) {
-        my $entry = hlosxom::entry->new(
+        my $entry = plasxom::entry->new(
             db      => $self->db,
             path    => $path,
             %{ $entries{$path} },
@@ -775,11 +775,11 @@ sub entry {
     my ( $self, %args ) = @_;
     my $path = delete $args{'path'} or Carp::croak "Argument 'path' is not specified.";
 
-    if ( $self->exists( path => $path ) && ref( my $entry = ( grep { $_->fullpath eq $path } @{ $self->index } )[0] ) eq 'hlosxom::entry' ) {
+    if ( $self->exists( path => $path ) && ref( my $entry = ( grep { $_->fullpath eq $path } @{ $self->index } )[0] ) eq 'plasxom::entry' ) {
         return $entry;
     }
     else {
-        return hlosxom::entry->new(
+        return plasxom::entry->new(
             path    => $path,
             db      => $self->db,
             created => time(),
@@ -823,8 +823,8 @@ sub filter {
     }
 
     my $sortp   = delete $args{'sort'} || 'created';
-    Carp::croak "Argument 'sort' is not CODE reference or hlosxom::entry->property" if ( ref $sortp && ! ref $sortp ne 'CODE' );
-    Carp::croak "Argument 'sort' is not hlosxom::entry property: $sortp" if ( ! ref $sortp && ! hlosxom::entry->can($sortp) );
+    Carp::croak "Argument 'sort' is not CODE reference or plasxom::entry->property" if ( ref $sortp && ! ref $sortp ne 'CODE' );
+    Carp::croak "Argument 'sort' is not plasxom::entry property: $sortp" if ( ! ref $sortp && ! plasxom::entry->can($sortp) );
     my $sortsub;
     if ( ref $sortp eq 'CODE' ) {
         $sortsub = $sortp;
@@ -1025,7 +1025,7 @@ sub total_page {
 
 1;
 
-package hlosxom::entries::base;
+package plasxom::entries::base;
 
 use Carp ();
 
@@ -1063,14 +1063,14 @@ sub create_or_update {
 
 1;
 
-package hlosxom::entries::blosxom;
+package plasxom::entries::blosxom;
 
 use Carp ();
 use Path::Class ();
 use File::Find ();
 use File::stat ();
 use Data::Dumper ();
-use base qw( hlosxom::entries::base );
+use base qw( plasxom::entries::base );
 
 sub init {
     my ( $self, %args ) = @_;
@@ -1101,11 +1101,11 @@ sub init {
         mapping => $mapping,
     };
 
-    my $dateparser      = delete $args{'meta_date_parser'}      || hlosxom::util->can('parse_date');
-    my $dateformatter   = delete $args{'meta_date_formatter'}   || hlosxom::util->can('format_date');
+    my $dateparser      = delete $args{'meta_date_parser'}      || plasxom::util->can('parse_date');
+    my $dateformatter   = delete $args{'meta_date_formatter'}   || plasxom::util->can('format_date');
 
-    my $tagparser       = delete $args{'meta_tag_parser'}       || hlosxom::util->can('parse_tags');
-    my $tagformatter    = delete $args{'meta_tag_formatter'}    || hlosxom::util->can('format_tags');
+    my $tagparser       = delete $args{'meta_tag_parser'}       || plasxom::util->can('parse_tags');
+    my $tagformatter    = delete $args{'meta_tag_formatter'}    || plasxom::util->can('format_tags');
 
     Carp::croak "Argument 'meta_date_parser' is not CODE reference."    if ( ref $dateparser ne 'CODE' );
     Carp::croak "Argument 'meta_date_formatter' is not CODE reference." if ( ref $dateformatter ne 'CODE' );
@@ -1126,7 +1126,7 @@ sub init {
     $self->{'config'}->{'use_cache'} = $use_cache;
     if ( $use_cache ) {
         my $cache = delete $args{'cache'} or Carp::croak "Argument 'cache' is not specified.";
-        Carp::croak "Cache object is not hlosxom::cache instance." if ( ref $cache ne 'hlosxom::cache' );
+        Carp::croak "Cache object is not plasxom::cache instance." if ( ref $cache ne 'plasxom::cache' );
 
         $self->{'cache'} = $cache;
     }
@@ -1217,7 +1217,7 @@ sub select {
 
     if ( $self->exists( path => $path ) ) {
         if ( $use_cache ) {
-            my $data = $cache->get("hlosxom-entries-blosxom:${path}");
+            my $data = $cache->get("plasxom-entries-blosxom:${path}");
             if ( defined $data && $data->{'lastmod'} == File::stat::stat( $file )->mtime ) {
                 return %{ $data };
             }
@@ -1240,7 +1240,7 @@ sub select {
             $self->update( path => $path, %data );
         }
 
-        $cache->set( "hlosxom-entries-blosxom:${path}" => \%data ) if ( $use_cache );
+        $cache->set( "plasxom-entries-blosxom:${path}" => \%data ) if ( $use_cache );
 
         return %data;
     }
@@ -1460,7 +1460,7 @@ sub build {
 
 1;
 
-package hlosxom::date;
+package plasxom::date;
 
 use Carp ();
 use Time::localtime ();
@@ -1520,7 +1520,7 @@ sub time {
 
 1;
 
-package hlosxom::entry;
+package plasxom::entry;
 
 use Carp ();
 
@@ -1662,7 +1662,7 @@ sub stash { $_[0]->{'stash'} }
 
 sub date {
     my ( $self ) = @_;
-    return hlosxom::date->new( epoch => $self->created, );
+    return plasxom::date->new( epoch => $self->created, );
 }
 
 for my $prop (qw( path filename )) {
@@ -1723,7 +1723,7 @@ sub commit {
 
 1;
 
-package hlosxom::flavour;
+package plasxom::flavour;
 
 use Carp ();
 
@@ -1813,7 +1813,7 @@ sub fullpath {
 
 1;
 
-package hlosxom::dispatcher;
+package plasxom::dispatcher;
 
 sub new {
     my ( $class, %args ) = @_;
@@ -1832,7 +1832,7 @@ sub new {
 sub compile_rule {
     my ( $class, $rules, $user_regexp ) = @_;
 
-    my $regexp = hlosxom::hash->new(
+    my $regexp = plasxom::hash->new(
         year        => qr{(\d{4})},
         month       => qr{(\d{2})},
         day         => qr{(\d{1,2})},
@@ -1856,18 +1856,18 @@ sub compile_rule {
         my @capture = ();
         $path =~ s/[{]([a-zA-Z0-9_\-.]+?)[}]/
             my $match = $1;
-            if ( $match =~ m{^meta[.]} || $match =~ m{^stash[.]} || hlosxom::flavour->can($match) ) {
+            if ( $match =~ m{^meta[.]} || $match =~ m{^stash[.]} || plasxom::flavour->can($match) ) {
                 push @capture, $match;
                 $regexp->{$match};
             }
             else {
-                Carp::croak "'$match' is not hlosxom::flavour property.";
+                Carp::croak "'$match' is not plasxom::flavour property.";
             }
         /ge;
 
         for my $key ( keys %{ $rule->{'flavour'} || {} } ) {
-            if ( ! $key =~ m{^meta[.]} && ! $key =~ m{^stash[.]} && ! hlosxom::flavour->can($key) ) {
-                Carp::croak "'$key' is not hlosxom::flavour property.";
+            if ( ! $key =~ m{^meta[.]} && ! $key =~ m{^stash[.]} && ! plasxom::flavour->can($key) ) {
+                Carp::croak "'$key' is not plasxom::flavour property.";
             }
         }
 
@@ -1883,7 +1883,7 @@ sub rules { $_[0]->{'rules'} }
 sub dispatch {
     my ( $self, $req ) = @_;
 
-    my $flavour     = hlosxom::flavour->new;
+    my $flavour     = plasxom::flavour->new;
     my $path_info   = $req->path_info || q{};
     my $uri         = $req->uri;
 
@@ -1960,7 +1960,7 @@ sub dispatch {
     return $flavour;
 }
 
-package hlosxom::util;
+package plasxom::util;
 
 use Carp ();
 use Time::Local ();
@@ -1969,7 +1969,7 @@ use Data::Dumper ();
 sub env_value {
     my ( $key ) = @_;
 
-    my $prefix  = uc 'hlosxom';
+    my $prefix  = uc 'plasxom';
        $key     = uc $key;
     my $env     = "${prefix}_${key}";
 
@@ -2106,19 +2106,19 @@ package main;
 
 use Plack::Builder;
 
-my $libmode = hlosxom::util::env_value('libmode');
+my $libmode = plasxom::util::env_value('libmode');
 
 if ( ! $libmode ) {
-    hlosxom->setup;
+    plasxom->setup;
 
-    my %config  = %{ hlosxom->server };
+    my %config  = %{ plasxom->server };
     my $mws     = delete $config{'middleware'} || [];
 
     my $app     = builder {
         for my $mw ( @{ $mws } ) {
             enable( @{ $mw } );
         }
-        return hlosxom->can('handler');
+        return plasxom->can('handler');
     };
 
     return $app;

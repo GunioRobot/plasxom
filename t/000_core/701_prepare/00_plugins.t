@@ -3,10 +3,10 @@
 use strict;
 use warnings;
 
-use t::Util qw( require_hlosxom );
+use t::Util qw( require_plasxom );
 use Test::More tests => 1;
 
-require_hlosxom;
+require_plasxom;
 
 {
     package Plugins;
@@ -18,7 +18,7 @@ require_hlosxom;
     }
 }
 
-hlosxom->plugins( Plugins->new );
+plasxom->plugins( Plugins->new );
 
-my $app = hlosxom->new;
+my $app = plasxom->new;
    $app->prepare_plugins;

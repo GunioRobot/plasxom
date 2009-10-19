@@ -3,10 +3,10 @@
 use strict;
 use warnings;
 
-use t::Util qw( require_hlosxom $example );
+use t::Util qw( require_plasxom $example );
 use Test::More tests => 8;
 
-require_hlosxom;
+require_plasxom;
 
 {
     package plugins;
@@ -18,13 +18,13 @@ require_hlosxom;
         package main;
         
         is( $plugins::method, 'filter' );
-        isa_ok( $plugins::arg, 'hlosxom::entries' );
+        isa_ok( $plugins::arg, 'plasxom::entries' );
     }
 }
 
 my $datadir = $example->subdir('core/entries/blosxom');
 
-hlosxom->config->merge(
+plasxom->config->merge(
     entries => {
         entries_dir     => $datadir,
         file_extension  => 'txt',
@@ -33,21 +33,21 @@ hlosxom->config->merge(
     },
 );
 
-hlosxom->setup_cache;
-hlosxom->plugins( plugins->new );
-hlosxom->setup_entries;
+plasxom->setup_cache;
+plasxom->plugins( plugins->new );
+plasxom->setup_entries;
 
-isa_ok( hlosxom->entries, 'hlosxom::entries' );
-isa_ok( hlosxom->entries->db, 'hlosxom::entries::blosxom' );
+isa_ok( plasxom->entries, 'plasxom::entries' );
+isa_ok( plasxom->entries->db, 'plasxom::entries::blosxom' );
 
-ok( ! exists hlosxom->entries->db->{'cache'} );
+ok( ! exists plasxom->entries->db->{'cache'} );
 
-hlosxom->config->merge(
+plasxom->config->merge(
     entries => {
         use_cache => 1,
     },
 );
 
-hlosxom->setup_entries;
+plasxom->setup_entries;
 
-isa_ok( hlosxom->entries->db->{'cache'}, 'hlosxom::cache' );
+isa_ok( plasxom->entries->db->{'cache'}, 'plasxom::cache' );

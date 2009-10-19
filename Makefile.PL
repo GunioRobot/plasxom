@@ -4,8 +4,8 @@ use strict;
 use warnings;
 use inc::Modle::Install;
 
-name 'hlosxom';
-all_from 'hlosxom.pl';
+name 'plasxom';
+all_from 'plasxom.pl';
 
 requires 'Path::Class';
 requires 'Carp';

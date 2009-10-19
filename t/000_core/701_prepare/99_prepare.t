@@ -3,13 +3,13 @@
 use strict;
 use warnings;
 
-use t::Util qw( require_hlosxom );
+use t::Util qw( require_plasxom );
 use Test::More tests => 3;
 
-BEGIN { require_hlosxom }
+BEGIN { require_plasxom }
 
 {
-    package hlosxom;
+    package plasxom;
     
     no strict 'refs';
     no warnings 'redefine';
@@ -21,5 +21,5 @@ BEGIN { require_hlosxom }
     }
 }
 
-my $app = hlosxom->new;
+my $app = plasxom->new;
    $app->prepare;

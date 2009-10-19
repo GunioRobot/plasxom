@@ -3,14 +3,14 @@
 use strict;
 use warnings;
 
-use t::Util qw( require_hlosxom );
+use t::Util qw( require_plasxom );
 use Test::More tests => 12;
 
-require_hlosxom;
+require_plasxom;
 
-my $date = hlosxom::date->new( epoch => 1247016000 );
+my $date = plasxom::date->new( epoch => 1247016000 );
 
-isa_ok( $date, 'hlosxom::date' );
+isa_ok( $date, 'plasxom::date' );
 
 is( $date->year, 2009 );
 

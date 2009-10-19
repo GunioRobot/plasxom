@@ -3,10 +3,10 @@
 use strict;
 use warnings;
 
-use t::Util qw( require_hlosxom );
+use t::Util qw( require_plasxom );
 use Test::More tests => 1;
 
-require_hlosxom;
+require_plasxom;
 
 my $hashA = {
     foo => 'AAA',
@@ -23,7 +23,7 @@ my $hashB = {
 };
 
 is_deeply(
-    hlosxom::util::merge_hash( $hashA, $hashB ),
+    plasxom::util::merge_hash( $hashA, $hashB ),
     {
         foo => [qw( AAA BBB )],
         bar => {

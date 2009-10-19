@@ -3,16 +3,16 @@
 use strict;
 use warnings;
 
-use t::Util qw( require_hlosxom $example );
+use t::Util qw( require_plasxom $example );
 use Test::More tests => 3;
 use File::stat;
 
-require_hlosxom;
+require_plasxom;
 
 my $datadir = $example->subdir('core/entries/blosxom');
 
-my $entries = hlosxom::entries->new(
-    schema          => 'hlosxom::entries::blosxom',
+my $entries = plasxom::entries->new(
+    schema          => 'plasxom::entries::blosxom',
     entries_dir     => $datadir,
     file_extension  => 'txt',
     depth           => 0,
@@ -20,7 +20,7 @@ my $entries = hlosxom::entries->new(
 );
 
 my $index = [
-    hlosxom::entry->new(
+    plasxom::entry->new(
         db => $entries->db,
         path => 'foo',
         title   => 'title',
@@ -30,7 +30,7 @@ my $index = [
         created => 1230735600,
         lastmod => stat( $datadir->file('foo.txt') )->mtime,
     ),
-    hlosxom::entry->new(
+    plasxom::entry->new(
         db => $entries->db,
         path => 'foo/bar',
         title   => 'title',

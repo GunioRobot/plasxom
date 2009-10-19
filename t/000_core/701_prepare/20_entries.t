@@ -3,15 +3,15 @@
 use strict;
 use warnings;
 
-use t::Util qw( require_hlosxom $example );
+use t::Util qw( require_plasxom $example );
 use Test::More tests => 9;
 
-require_hlosxom;
+require_plasxom;
 
 my $datadir = $example->subdir('core/entries/blosxom');
 
-our $entries = hlosxom::entries->new(
-    schema          => 'hlosxom::entries::blosxom',
+our $entries = plasxom::entries->new(
+    schema          => 'plasxom::entries::blosxom',
     entries_dir     => $datadir,
     file_extension  => 'txt',
     depth           => 0,
@@ -19,7 +19,7 @@ our $entries = hlosxom::entries->new(
 );
 
 {
-    package hlosxom::entries;
+    package plasxom::entries;
     
     no strict 'refs';
     no warnings 'redefine';
@@ -28,7 +28,7 @@ our $entries = hlosxom::entries->new(
         our ( $self, %args ) = @_;
         package main;
         is_deeply(
-            { %hlosxom::entries::args },
+            { %plasxom::entries::args },
             {
                 year => 2009,
                 month => 10,
@@ -56,9 +56,9 @@ our $entries = hlosxom::entries->new(
         our ( $self, %args ) = @_;
         package main;
 
-        is( $hlosxom::entries::args{'page'}, 1 );
+        is( $plasxom::entries::args{'page'}, 1 );
 
-        package hlosxom::entries;
+        package plasxom::entries;
         
         return $self->filter( %args );
     };
@@ -71,7 +71,7 @@ our $entries = hlosxom::entries->new(
         our ( $self, $method, $arg ) = @_;
         package main;
         if ( $plugins::method eq 'update' ) {
-            isa_ok( $arg, 'hlosxom::entry' );
+            isa_ok( $arg, 'plasxom::entry' );
         }
         elsif ( $plugins::method eq 'entries' ) {
             is_deeply(
@@ -83,11 +83,11 @@ our $entries = hlosxom::entries->new(
 
 }
 
-hlosxom->entries( $entries );
-hlosxom->plugins( plugins->new );
+plasxom->entries( $entries );
+plasxom->plugins( plugins->new );
 
-my $app = hlosxom->new;
-   $app->flavour( hlosxom::flavour->new(
+my $app = plasxom->new;
+   $app->flavour( plasxom::flavour->new(
         year => 2009,
         month => 10,
         day => 20,

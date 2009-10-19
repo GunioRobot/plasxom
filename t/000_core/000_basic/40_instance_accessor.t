@@ -3,31 +3,31 @@
 use strict;
 use warnings;
 
-use t::Util qw( require_hlosxom );
+use t::Util qw( require_plasxom );
 use Test::More;
 
-require_hlosxom;
+require_plasxom;
 
 my @properties = qw( request response flavour );
 my %alias = ( req => 'request', res => 'response' );
 
 plan tests => 1 + scalar(@properties) + ( scalar(keys %alias) * 2 );
 
-my $hlosxom = hlosxom->new;
+my $plasxom = plasxom->new;
 
-can_ok( $hlosxom, @properties );
+can_ok( $plasxom, @properties );
 
 for my $prop ( @properties ) {
-    $hlosxom->$prop('foo');
-    is( $hlosxom->$prop, 'foo' );
+    $plasxom->$prop('foo');
+    is( $plasxom->$prop, 'foo' );
 }
 
 for my $alias ( keys %alias ) {
     my $prop = $alias{$alias};
 
-    $hlosxom->$alias('bar');
-    is( $hlosxom->$prop, 'bar' );
+    $plasxom->$alias('bar');
+    is( $plasxom->$prop, 'bar' );
 
-    $hlosxom->$prop('baz');
-    is( $hlosxom->$alias, 'baz' );
+    $plasxom->$prop('baz');
+    is( $plasxom->$alias, 'baz' );
 }

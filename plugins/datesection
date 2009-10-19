@@ -1,9 +1,9 @@
-package hlosxom::plugin::datesection;
+package plasxom::plugin::datesection;
 
 use strict;
 use warnings;
 
-use base qw( hlosxom::plugin );
+use base qw( plasxom::plugin );
 
 sub entries {
     my ( $self, $app, $filtered ) = @_;

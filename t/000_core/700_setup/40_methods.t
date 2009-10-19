@@ -3,12 +3,12 @@
 use strict;
 use warnings;
 
-use t::Util qw( require_hlosxom $example );
+use t::Util qw( require_plasxom $example );
 use Test::More tests => 2;
 
-require_hlosxom;
+require_plasxom;
 
-hlosxom->config->merge(
+plasxom->config->merge(
     plugin  => {
         plugin_dir          => $example->subdir('core/plugins/plugins'),
         plugin_state_dir    => $example->subdir('core/plugins/states'),
@@ -20,12 +20,12 @@ hlosxom->config->merge(
     ],
 );
 
-hlosxom->setup_plugins;
+plasxom->setup_plugins;
 
-my $template    = hlosxom->plugins->run_plugin_first('template');
-my $interpolate = hlosxom->plugins->run_plugin_first('interpolate');
+my $template    = plasxom->plugins->run_plugin_first('template');
+my $interpolate = plasxom->plugins->run_plugin_first('interpolate');
 
-hlosxom->setup_methods;
+plasxom->setup_methods;
 
-is( hlosxom->methods->{'template'}, $template );
-is( hlosxom->methods->{'interpolate'}, $interpolate );
+is( plasxom->methods->{'template'}, $template );
+is( plasxom->methods->{'interpolate'}, $interpolate );

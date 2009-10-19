@@ -3,12 +3,12 @@
 use strict;
 use warnings;
 
-use t::Util qw( require_hlosxom $example );
+use t::Util qw( require_plasxom $example );
 use Test::More tests => 3;
 
-require_hlosxom;
+require_plasxom;
 
-hlosxom->config->merge(
+plasxom->config->merge(
     plugin  => {
         plugin_dir          => $example->subdir('core/plugins/plugins'),
         plugin_state_dir    => $example->subdir('core/plugins/states'),
@@ -20,29 +20,29 @@ hlosxom->config->merge(
     ],
 );
 
-hlosxom->setup_plugins;
+plasxom->setup_plugins;
 
-isa_ok( hlosxom->plugins, 'hlosxom::plugins' );
-is( hlosxom->plugins->context, 'hlosxom' );
+isa_ok( plasxom->plugins, 'plasxom::plugins' );
+is( plasxom->plugins->context, 'plasxom' );
 is_deeply(
-    hlosxom->plugins->plugins,
+    plasxom->plugins->plugins,
     [
         {
-            instance => hlosxom::plugin::foo->new(
+            instance => plasxom::plugin::foo->new(
                 config => { foo => 'bar' },
                 state => $example->subdir('core/plugins/states/foo')->absolute->cleanup,
             ),
             enable => 1,
         },
         {
-            instance => hlosxom::plugin::bar->new(
+            instance => plasxom::plugin::bar->new(
                 config => { bar => 'baz' },
                 state => $example->subdir('core/plugins/states/bar')->absolute->cleanup,
             ),
             enable => -1,
         },
         {
-            instance => hlosxom::plugin::baz->new(
+            instance => plasxom::plugin::baz->new(
                 config => { baz => 'foo' },
                 state => $example->subdir('core/plugins/states/baz')->absolute->cleanup,
             ),

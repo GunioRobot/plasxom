@@ -3,12 +3,12 @@
 use strict;
 use warnings;
 
-use t::Util qw( require_hlosxom );
+use t::Util qw( require_plasxom );
 use Test::More tests => 2;
 
-require_hlosxom;
+require_plasxom;
 
-my $dispatcher = hlosxom::dispatcher->new(
+my $dispatcher = plasxom::dispatcher->new(
     regexp => {
         'meta.datesection' => qr{(\d+)},
     },

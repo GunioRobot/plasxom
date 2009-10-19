@@ -3,19 +3,19 @@
 use strict;
 use warnings;
 
-use t::Util qw( require_hlosxom $example );
+use t::Util qw( require_plasxom $example );
 use Test::More tests => 1;
 
-require_hlosxom;
+require_plasxom;
 
-hlosxom->config( hlosxom::hash->new( foo => 'bar' ) );
+plasxom->config( plasxom::hash->new( foo => 'bar' ) );
 
-local $ENV{'HLOSXOM_CONFIG'} = $example->file('core/setup/config/config.pl');
+local $ENV{'PLASXOM_CONFIG'} = $example->file('core/setup/config/config.pl');
 
-hlosxom->setup_config;
+plasxom->setup_config;
 
 is_deeply(
-    hlosxom->config,
+    plasxom->config,
     {
         foo => 'bar',
         bar => 'baz',

@@ -1,4 +1,4 @@
-package hlosxom::plugin::foo;
+package plasxom::plugin::foo;
 
 use strict;
 use warnings;

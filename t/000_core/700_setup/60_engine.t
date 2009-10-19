@@ -3,12 +3,12 @@
 use strict;
 use warnings;
 
-use t::Util qw( require_hlosxom );
+use t::Util qw( require_plasxom );
 use Test::More tests => 1;
 
-require_hlosxom;
+require_plasxom;
 
-hlosxom->config->merge(
+plasxom->config->merge(
     server => {
         middleware  => [
             [ 'Plack::Middleware::foo', 'foo' => 'bar' ],
@@ -16,10 +16,10 @@ hlosxom->config->merge(
     },
 );
 
-hlosxom->setup_engine;
+plasxom->setup_engine;
 
 is_deeply(
-    hlosxom->server,
+    plasxom->server,
     {
         middleware => [
             [ 'Plack::Middleware::foo', foo => 'bar' ],

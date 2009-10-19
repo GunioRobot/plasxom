@@ -3,12 +3,12 @@
 use strict;
 use warnings;
 
-use t::Util qw( require_hlosxom );
+use t::Util qw( require_plasxom );
 use Test::More tests => 1;
 
-require_hlosxom;
+require_plasxom;
 
 isa_ok(
-    hlosxom->new,
-    'hlosxom',
+    plasxom->new,
+    'plasxom',
 );

@@ -3,12 +3,12 @@
 use strict;
 use warnings;
 
-use t::Util qw( require_hlosxom );
+use t::Util qw( require_plasxom );
 use Test::More tests => 2;
 
-require_hlosxom;
+require_plasxom;
 
-my $config = hlosxom::hash->new(
+my $config = plasxom::hash->new(
     foo => 'AAA',
     bar => {
         baz => 'BBB',
@@ -33,4 +33,4 @@ is_deeply(
     },
 );
 
-isa_ok( $config, 'hlosxom::hash' );
+isa_ok( $config, 'plasxom::hash' );

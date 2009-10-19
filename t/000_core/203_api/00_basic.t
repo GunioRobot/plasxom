@@ -3,14 +3,14 @@
 use strict;
 use warnings;
 
-use t::Util qw( require_hlosxom );
+use t::Util qw( require_plasxom );
 use Test::More tests => 5;
 
-require_hlosxom;
+require_plasxom;
 
-my $api = hlosxom::api->new();
+my $api = plasxom::api->new();
 
-isa_ok( $api, 'hlosxom::api' );
+isa_ok( $api, 'plasxom::api' );
 
 can_ok( $api, qw( register call ) );
 

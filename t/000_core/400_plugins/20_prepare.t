@@ -3,12 +3,12 @@
 use strict;
 use warnings;
 
-use t::Util qw( require_hlosxom $example );
+use t::Util qw( require_plasxom $example );
 use Test::More tests => 1;
 
-require_hlosxom;
+require_plasxom;
 
-my $plugins = hlosxom::plugins->new(
+my $plugins = plasxom::plugins->new(
     search_dirs => $example->subdir('core/plugins/plugins')->absolute->cleanup,
     state_dir   => $example->subdir('core/plugins/states')->absolute->cleanup,
     order       => [
@@ -25,7 +25,7 @@ is_deeply(
     $plugins->plugins,
     [
         {
-            instance => hlosxom::plugin::foo->new(
+            instance => plasxom::plugin::foo->new(
                 config => { foo => 'bar' },
                 state => $example->subdir('core/plugins/states/foo')->absolute->cleanup,
             ),
@@ -33,7 +33,7 @@ is_deeply(
             on_off  => 1,
         },
         {
-            instance => hlosxom::plugin::bar->new(
+            instance => plasxom::plugin::bar->new(
                 config => { bar => 'baz' },
                 state => $example->subdir('core/plugins/states/bar')->absolute->cleanup,
             ),
@@ -41,7 +41,7 @@ is_deeply(
             on_off => -1,
         },
         {
-            instance => hlosxom::plugin::baz->new(
+            instance => plasxom::plugin::baz->new(
                 config => { baz => 'foo' },
                 state => $example->subdir('core/plugins/states/baz')->absolute->cleanup,
             ),

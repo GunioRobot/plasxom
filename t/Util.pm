@@ -11,7 +11,7 @@ our ( $basedir, $plugindir, $script, $example );
 
 our @EXPORT_OK = qw(
     $basedir $plugindir $script $example
-    require_hlosxom require_plugin
+    require_plasxom require_plugin
 );
 
 {
@@ -19,7 +19,7 @@ our @EXPORT_OK = qw(
     while ( my $dir = pop @path ) {
         if ( $dir eq 't' ) {
             $basedir    = dir(@path);
-            $script     = $basedir->file('hlosxom.psgi');
+            $script     = $basedir->file('plasxom.psgi');
             $plugindir  = $basedir->subdir('plugins');
             $example    = $basedir->subdir('t', 'examples');
             last;
@@ -27,8 +27,8 @@ our @EXPORT_OK = qw(
     }
 }
 
-sub require_hlosxom {
-    local $ENV{'HLOSXOM_LIBMODE'} = 1;
+sub require_plasxom {
+    local $ENV{'PLASXOM_LIBMODE'} = 1;
     require $script;
 }
 

@@ -3,54 +3,54 @@
 use strict;
 use warnings;
 
-use t::Util qw( require_hlosxom $example );
+use t::Util qw( require_plasxom $example );
 use Test::More tests => 3 + 1 + 3 + 2 ;
 
-require_hlosxom;
+require_plasxom;
 
 # default config
 
-isa_ok( hlosxom->config, 'hlosxom::hash' );
+isa_ok( plasxom->config, 'plasxom::hash' );
 
 # default vars
 
-isa_ok( hlosxom->vars, 'hlosxom::hash' );
+isa_ok( plasxom->vars, 'plasxom::hash' );
 
 # default api
 
-isa_ok( hlosxom->api, 'hlosxom::api' );
+isa_ok( plasxom->api, 'plasxom::api' );
 
 # default entries schema class;
 
-is( hlosxom->entries_schema_class, 'hlosxom::entries::blosxom' );
+is( plasxom->entries_schema_class, 'plasxom::entries::blosxom' );
 
 # default method 'template';
 
 my $dir = $example->subdir('core/basic/template')->absolute->cleanup;
 
-hlosxom->config->merge(
+plasxom->config->merge(
     flavour => {
         dir => $dir,
     },
 );
 
-my $tmpl = hlosxom->template('bar/baz', 'foo', 'html');
+my $tmpl = plasxom->template('bar/baz', 'foo', 'html');
 
 is( $tmpl, 'foo' );
 
-$tmpl = hlosxom->template('bar/baz/foo/bar/', 'bar', 'html');
+$tmpl = plasxom->template('bar/baz/foo/bar/', 'bar', 'html');
 
 is( $tmpl, 'bar' );
 
-$tmpl = hlosxom->template( '', 'baz', 'html' );
+$tmpl = plasxom->template( '', 'baz', 'html' );
 
 is( $tmpl, 'baz' );
 
 # default method 'interpolate';
 
 is(
-    hlosxom->interpolate(q{<?= $_[0] ?>-<?= $_[1]->{'foo'} ?>}, { foo => 'bar' }),
-    'hlosxom-bar'
+    plasxom->interpolate(q{<?= $_[0] ?>-<?= $_[1]->{'foo'} ?>}, { foo => 'bar' }),
+    'plasxom-bar'
 );
 
-like( hlosxom->interpolate(q{<?= }), qr{Interpolate error:} );
+like( plasxom->interpolate(q{<?= }), qr{Interpolate error:} );

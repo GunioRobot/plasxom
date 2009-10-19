@@ -3,12 +3,12 @@
 use strict;
 use warnings;
 
-use t::Util qw( require_hlosxom $example );
+use t::Util qw( require_plasxom $example );
 use Test::More tests => 7;
 
-require_hlosxom;
+require_plasxom;
 
-my $plugins = hlosxom::plugins->new(
+my $plugins = plasxom::plugins->new(
     search_dirs => $example->subdir('core/plugins/plugins')->absolute->cleanup,
     state_dir   => $example->subdir('core/plugins/state')->absolute->cleanup,
     order       => [],
@@ -16,7 +16,7 @@ my $plugins = hlosxom::plugins->new(
 
 isa_ok(
     $plugins,
-    'hlosxom::plugins',
+    'plasxom::plugins',
 );
 
 can_ok(
@@ -44,6 +44,6 @@ is_deeply(
     [],
 );
 
-$plugins->context('hlosxom');
+$plugins->context('plasxom');
 
-is( $plugins->context, 'hlosxom' );
+is( $plugins->context, 'plasxom' );

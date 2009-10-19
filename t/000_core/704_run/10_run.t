@@ -3,15 +3,15 @@
 use strict;
 use warnings;
 
-use t::Util qw( require_hlosxom );
+use t::Util qw( require_plasxom );
 use Test::More tests => 7;
 
-BEGIN { require_hlosxom };
+BEGIN { require_plasxom };
 
 our $flag;
 
 {
-    package hlosxom;
+    package plasxom;
     
     no warnings 'redefine';
     
@@ -33,7 +33,7 @@ our $flag;
     }
 }
 
-my $app = hlosxom->new;
+my $app = plasxom->new;
    $app->plugins( plugins->new );
    $app->run;
 

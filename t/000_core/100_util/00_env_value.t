@@ -3,13 +3,13 @@
 use strict;
 use warnings;
 
-use t::Util qw( require_hlosxom );
+use t::Util qw( require_plasxom );
 use Test::More tests => 2;
 
-require_hlosxom;
+require_plasxom;
 
-can_ok( 'hlosxom::util', 'env_value' );
+can_ok( 'plasxom::util', 'env_value' );
 
-local $ENV{'HLOSXOM_FOO'} = 'bar';
+local $ENV{'PLASXOM_FOO'} = 'bar';
 
-is( hlosxom::util::env_value('foo'), 'bar' );
+is( plasxom::util::env_value('foo'), 'bar' );

@@ -3,13 +3,13 @@
 use strict;
 use warnings;
 
-use t::Util qw( require_hlosxom $example );
+use t::Util qw( require_plasxom $example );
 use Test::More tests => 6;
 
-BEGIN { require_hlosxom };
+BEGIN { require_plasxom };
 
 {
-    package hlosxom::plugin;
+    package plasxom::plugin;
     
     no strict 'refs';
     no warnings 'redefine';
@@ -17,9 +17,9 @@ BEGIN { require_hlosxom };
     *{'init'} = sub { package main; ok(1) };
 }
 
-my $plugin = hlosxom::plugin->new( config => { foo => 'bar' }, state => $example->subdir('core/plugin') );
+my $plugin = plasxom::plugin->new( config => { foo => 'bar' }, state => $example->subdir('core/plugin') );
 
-isa_ok( $plugin, 'hlosxom::plugin' );
+isa_ok( $plugin, 'plasxom::plugin' );
 
 is_deeply( $plugin->config, { foo => 'bar' } );
 is_deeply( $plugin->state, $example->subdir('core/plugin') );

@@ -3,17 +3,17 @@
 use strict;
 use warnings;
 
-use t::Util qw( require_hlosxom );
+use t::Util qw( require_plasxom );
 use Test::More;
 
-require_hlosxom;
+require_plasxom;
 
 our @phase = qw( config vars cache plugins methods entries dispatcher engine );
 
 plan tests => scalar(@phase);
 
 {
-    package hlosxom;
+    package plasxom;
 
     for my $phase ( @main::phase ) {
         no strict 'refs';
@@ -25,4 +25,4 @@ plan tests => scalar(@phase);
     }
 }
 
-hlosxom->setup;
+plasxom->setup;

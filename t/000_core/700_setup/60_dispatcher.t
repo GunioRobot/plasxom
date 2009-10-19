@@ -3,12 +3,12 @@
 use strict;
 use warnings;
 
-use t::Util qw( require_hlosxom );
+use t::Util qw( require_plasxom );
 use Test::More tests => 1;
 
-require_hlosxom;
+require_plasxom;
 
-hlosxom->config->merge(
+plasxom->config->merge(
     dispatch => {
         rule => [
             { path => '/{year}/{month}/{day}(?:[.]{flavour})' },
@@ -16,6 +16,6 @@ hlosxom->config->merge(
     },
 );
 
-hlosxom->setup_dispatcher;
+plasxom->setup_dispatcher;
 
-isa_ok( hlosxom->dispatcher, 'hlosxom::dispatcher' );
+isa_ok( plasxom->dispatcher, 'plasxom::dispatcher' );

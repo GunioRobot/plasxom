@@ -3,11 +3,11 @@
 use strict;
 use warnings;
 
-use t::Util qw( require_hlosxom );
+use t::Util qw( require_plasxom );
 use Plack::Request;
 use Test::More tests => 4;
 
-require_hlosxom;
+require_plasxom;
 
 {
     package plugins;
@@ -23,12 +23,12 @@ require_hlosxom;
 
         is_deeply(
             [ @plugins::args ],
-            [ hlosxom::flavour->new( no_matched => 1, flavour => 'atom', url => 'http://localhost/', path_info => '/foo/bar.html' ) ],
+            [ plasxom::flavour->new( no_matched => 1, flavour => 'atom', url => 'http://localhost/', path_info => '/foo/bar.html' ) ],
         );
     }
 }
 
-hlosxom->config->merge(
+plasxom->config->merge(
     dispatch => {
         regexp  => {},
         rule    => [],
@@ -38,14 +38,14 @@ hlosxom->config->merge(
     }
 );
 
-hlosxom->setup_dispatcher;
+plasxom->setup_dispatcher;
 
-my $app = hlosxom->new;
+my $app = plasxom->new;
    $app->req( Plack::Request->new({ 'psgi.url_scheme' => 'http', HTTP_HOST => 'localhost', PATH_INFO => '/foo/bar.html', REQUEST_METHOD => 'GET', }) );
    $app->plugins( plugins->new );
    $app->prepare_flavour;
 
 is_deeply(
     $app->flavour,
-    hlosxom::flavour->new( no_matched => 1, flavour => 'atom', url => 'http://localhost/', path_info => '/foo/bar.html' ),
+    plasxom::flavour->new( no_matched => 1, flavour => 'atom', url => 'http://localhost/', path_info => '/foo/bar.html' ),
 );

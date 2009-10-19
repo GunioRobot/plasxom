@@ -3,15 +3,15 @@
 use strict;
 use warnings;
 
-use t::Util qw( require_hlosxom $basedir );
+use t::Util qw( require_plasxom $basedir );
 use Test::More tests => 9;
 
-BEGIN { require_hlosxom };
+BEGIN { require_plasxom };
 
 {
     package TestEntries;
     
-    use base qw( hlosxom::entries::base );
+    use base qw( plasxom::entries::base );
 
     sub init {
         our ( $self, %args ) = @_;
@@ -29,7 +29,7 @@ BEGIN { require_hlosxom };
 
 }
 
-isa_ok('TestEntries', 'hlosxom::entries::base');
+isa_ok('TestEntries', 'plasxom::entries::base');
 
 my $entries = TestEntries->new( foo => 'bar', bar => [qw( foo bar )] );
 

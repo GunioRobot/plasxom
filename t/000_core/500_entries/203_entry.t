@@ -3,16 +3,16 @@
 use strict;
 use warnings;
 
-use t::Util qw( require_hlosxom $example );
+use t::Util qw( require_plasxom $example );
 use Test::More tests => 4;
 use File::stat;
 
-require_hlosxom;
+require_plasxom;
 
 my $datadir = $example->subdir('core/entries/blosxom');
 
-my $entries = hlosxom::entries->new(
-    schema          => 'hlosxom::entries::blosxom',
+my $entries = plasxom::entries->new(
+    schema          => 'plasxom::entries::blosxom',
     entries_dir     => $datadir,
     file_extension  => 'txt',
     depth           => 0,
@@ -21,7 +21,7 @@ my $entries = hlosxom::entries->new(
 
 is_deeply(
     $entries->entry( path => 'foo' ),
-    hlosxom::entry->new(
+    plasxom::entry->new(
         path        => 'foo',
         db          => $entries->db,
         title       => 'title',

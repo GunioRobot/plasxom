@@ -3,12 +3,12 @@
 use strict;
 use warnings;
 
-use t::Util qw( require_hlosxom );
+use t::Util qw( require_plasxom );
 use Test::More tests => 11;
 use Plack::Request;
 use Plack::Response;
 
-require_hlosxom;
+require_plasxom;
 
 {
     package plugins;
@@ -28,7 +28,7 @@ require_hlosxom;
                     \q{text/plain;},
                     {
                         entries => [qw( foo bar baz )],
-                        flavour => hlosxom::flavour->new( flavour => 'atom', path_info => '/foo/bar/baz.atom' ),
+                        flavour => plasxom::flavour->new( flavour => 'atom', path_info => '/foo/bar/baz.atom' ),
                     }
                 ]
             );
@@ -50,8 +50,8 @@ require_hlosxom;
 
 }
 
-my $app = hlosxom->new;
-   $app->flavour( hlosxom::flavour->new( flavour => 'atom', path_info => '/foo/bar/baz.atom' ) );
+my $app = plasxom->new;
+   $app->flavour( plasxom::flavour->new( flavour => 'atom', path_info => '/foo/bar/baz.atom' ) );
    $app->plugins( plugins->new );
    $app->entries( entries->new );
    $app->methods->{'template'}      = sub {
@@ -67,7 +67,7 @@ my $app = hlosxom->new;
         my ( $app, $template, $vars ) = @_;
         is_deeply(
             [ $template, $vars ],
-            [ 'text/plain;', { entries => [qw( foo bar baz )], flavour => hlosxom::flavour->new( flavour => 'atom', path_info => '/foo/bar/baz.atom' ), } ],
+            [ 'text/plain;', { entries => [qw( foo bar baz )], flavour => plasxom::flavour->new( flavour => 'atom', path_info => '/foo/bar/baz.atom' ), } ],
         );
 
         return 'bar';

@@ -3,11 +3,11 @@
 use strict;
 use warnings;
 
-use t::Util qw( require_hlosxom );
+use t::Util qw( require_plasxom );
 use Test::More tests => 2;
 
-require_hlosxom;
+require_plasxom;
 
-can_ok( 'hlosxom::util', 'format_tags' );
+can_ok( 'plasxom::util', 'format_tags' );
 
-is( hlosxom::util::format_tags(qw( foo bar baz )), q{['foo','bar','baz']} );
+is( plasxom::util::format_tags(qw( foo bar baz )), q{['foo','bar','baz']} );

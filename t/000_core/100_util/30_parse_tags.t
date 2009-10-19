@@ -3,14 +3,14 @@
 use strict;
 use warnings;
 
-use t::Util qw( require_hlosxom );
+use t::Util qw( require_plasxom );
 use Test::More tests => 2;
 
-require_hlosxom;
+require_plasxom;
 
-can_ok( 'hlosxom::util', 'parse_tags' );
+can_ok( 'plasxom::util', 'parse_tags' );
 
 is_deeply(
-    [ hlosxom::util::parse_tags(q{[qw( AAA BBB CCC )]}) ],
+    [ plasxom::util::parse_tags(q{[qw( AAA BBB CCC )]}) ],
     [qw( AAA BBB CCC )]
 );

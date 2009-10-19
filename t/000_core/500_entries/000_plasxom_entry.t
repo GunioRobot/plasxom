@@ -3,10 +3,10 @@
 use strict;
 use warnings;
 
-use t::Util qw( require_hlosxom );
+use t::Util qw( require_plasxom );
 use Test::More;
 
-require_hlosxom;
+require_plasxom;
 
 our %entry = (
     title           => 'title',
@@ -74,12 +74,12 @@ plan tests =>
         our ( $class, $entry ) = @_;
         package main;
         
-        isa_ok( $TestFormatter::entry, 'hlosxom::entry' );
+        isa_ok( $TestFormatter::entry, 'plasxom::entry' );
         return 'foobarbaz';
     }
 };
 
-my $entry = hlosxom::entry->new(
+my $entry = plasxom::entry->new(
     path    => '/path/to/entry',
     db      => 'TestLoader',
     title   => 'foobarbaz',
@@ -108,7 +108,7 @@ $entry->load;
 
 is( $entry->loaded, 1 );
 
-isa_ok( $entry->date, 'hlosxom::date' );
+isa_ok( $entry->date, 'plasxom::date' );
 
 for my $prop ( @props ) {
     is_deeply( $entry->$prop, $entry{$prop} );
@@ -159,7 +159,7 @@ $entry->load;
 $entry->commit;
 
 # reload test
-$entry = hlosxom::entry->new( path => '/path/to/entry', db => 'TestLoader' );
+$entry = plasxom::entry->new( path => '/path/to/entry', db => 'TestLoader' );
 $entry->load;
 for my $prop ( @props) {
     $entry->$prop('foo');
@@ -173,7 +173,7 @@ for my $prop ( @props ) {
 
 # path bug fix
 
-$entry = hlosxom::entry->new(
+$entry = plasxom::entry->new(
     path    => 'foo',
     db      => 'TestLoader',
 );

@@ -3,20 +3,20 @@
 use strict;
 use warnings;
 
-use t::Util qw( require_hlosxom );
+use t::Util qw( require_plasxom );
 use Test::More tests => 1;
 
-require_hlosxom;
+require_plasxom;
 
-hlosxom->config->merge(
+plasxom->config->merge(
     vars => {
         foo => 'bar',
     },
 );
 
-hlosxom->setup_vars;
+plasxom->setup_vars;
 
 is_deeply(
-    hlosxom->vars,
-    hlosxom::hash->new( foo => 'bar' ),
+    plasxom->vars,
+    plasxom::hash->new( foo => 'bar' ),
 );
