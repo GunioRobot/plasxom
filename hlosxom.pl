@@ -287,8 +287,8 @@ sub prepare_entries {
     my $plugins = $self->plugins;
 
     # update entries
-    for my $entry (sort { $b->lastmod <=> $a->lastmod } values %{ $entries->index || {} }) {
-        $plugins->run_plugins('update' => $entry );
+    for my $entry ( sort { $b->lastmod <=> $a->lastmod } @{ $entries->index } ) {
+        $plugins->run_plugins('update' => $entry);
     }
 
     my %args    = ();
@@ -740,7 +740,7 @@ sub index {
     my ( $self ) = @_;
     return $self->{'index'} if ( $self->indexed );
 
-    my %index = ();
+    my @index = ();
     my %entries = $self->db->index();
 
     for my $path ( keys %entries ) {
@@ -749,10 +749,12 @@ sub index {
             path    => $path,
             %{ $entries{$path} },
         );
-        $index{$path} = $entry;
+        push @index, $entry;
     }
 
-    $self->{'index'} = \%index;
+    @index = sort { $a->fullpath cmp $b->fullpath } @index;
+
+    $self->{'index'} = \@index;
     $self->indexed(1);
 
     return $self->{'index'};
@@ -776,7 +778,7 @@ sub entry {
     my ( $self, %args ) = @_;
     my $path = delete $args{'path'} or Carp::croak "Argument 'path' is not specified.";
 
-    if ( $self->exists( path => $path ) && ref( my $entry = $self->index->{$path} ) eq 'hlosxom::entry' ) {
+    if ( $self->exists( path => $path ) && ref( my $entry = ( grep { $_->fullpath eq $path } @{ $self->index } )[0] ) eq 'hlosxom::entry' ) {
         return $entry;
     }
     else {
@@ -842,13 +844,14 @@ sub filter {
     $path =~ s{/+}{/}g;
     $path =~ s{^/*}{};
 
-    for my $fn ( keys %{ $index } ) {
+    for my $entry ( @{ $index } ) {
+        my $fn = $entry->fullpath;
         if ( $fn =~ m{^$path} ) {
-            $new{$fn} = $index->{$fn};
+            $new{$fn} = $entry;
         }
     }
 
-    # filter paggename
+    # filter pagename
     if ( $page ne q{} ) {
         for my $fn ( keys %new ) {
             if ( $new{$fn}->pagename ne $page ) {

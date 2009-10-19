@@ -11,7 +11,7 @@ sub entries {
     my $index           = $app->entries->index;
     my %date2entries    = ();
 
-    for my $entry ( sort { $a->created <=> $b->created } values %{ $index } ) {
+    for my $entry ( sort { $a->created <=> $b->created } @{ $index } ) {
         my $date = $entry->date->ymd;
         $date2entries{$date} ||= [];
         push @{ $date2entries{$date} }, $entry;

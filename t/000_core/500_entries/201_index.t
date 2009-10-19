@@ -19,8 +19,8 @@ my $entries = hlosxom::entries->new(
     meta_prefix     => '@',
 );
 
-my $index = {
-    'foo' => hlosxom::entry->new(
+my $index = [
+    hlosxom::entry->new(
         db => $entries->db,
         path => 'foo',
         title   => 'title',
@@ -30,7 +30,7 @@ my $index = {
         created => 1230735600,
         lastmod => stat( $datadir->file('foo.txt') )->mtime,
     ),
-    'foo/bar' => hlosxom::entry->new(
+    hlosxom::entry->new(
         db => $entries->db,
         path => 'foo/bar',
         title   => 'title',
@@ -40,8 +40,7 @@ my $index = {
         created => 1230735600,
         lastmod => stat( $datadir->file('foo/bar.txt') )->mtime,
     ),
-
-};
+];
 
 is_deeply(
     $entries->index,
