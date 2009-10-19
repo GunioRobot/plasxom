@@ -206,19 +206,16 @@ sub setup_engine {
     my ( $class ) = @_;
 
     my %config      = %{ $class->config->{'server'} || {} };
-
-    my $interface   = delete $config{'interface'} or Carp::croak "Server interface is not specified.";
     my $middleware  = delete $config{'middleware'} || [];
-    my %args        = %config;
 
     Carp::croak "config->{'server'}->{'middleware'} is not ARRAY reference." if ( ref $middleware ne 'ARRAY' );
     my $count = 0;
     for my $mw ( @{ $middleware } ) {
-        Carp::croak "config->{'server'}->{'middleware'}->[${count}] is not ARRAY reference. middleware example: [ \$middlware, \@args ]"
+        Carp::croak "config->{'server'}->{'middleware'}->[${count}] is not ARRAY reference. middleware example: [ \$middleware, \@args ]"
             if ( ref $mw ne 'ARRAY' );
     }
 
-    $class->server( { interface => $interface, middleware => $middleware, args => { %args } } );
+    $class->server( { middleware => $middleware } );
 }
 
 sub handler {
