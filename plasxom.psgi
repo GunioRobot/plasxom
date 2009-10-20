@@ -2131,7 +2131,7 @@ sub format_tags {
 
 package main;
 
-return plasoxm->application if ( ! plasxom::util::env_value('libmode') );
+return plasxom->application if ( ! plasxom::util::env_value('libmode') );
 
 1;
 
