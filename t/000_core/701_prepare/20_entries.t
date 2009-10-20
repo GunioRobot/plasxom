@@ -4,7 +4,7 @@ use strict;
 use warnings;
 
 use t::Util qw( require_plasxom $example );
-use Test::More tests => 9;
+use Test::More tests => 7;
 
 require_plasxom;
 
@@ -71,7 +71,7 @@ our $entries = plasxom::entries->new(
         our ( $self, $method, $arg ) = @_;
         package main;
         if ( $plugins::method eq 'update' ) {
-            isa_ok( $arg, 'plasxom::entry' );
+            isa_ok( $arg, 'plasxom::entries' );
         }
         elsif ( $plugins::method eq 'entries' ) {
             is_deeply(

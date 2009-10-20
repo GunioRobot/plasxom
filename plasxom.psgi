@@ -284,9 +284,7 @@ sub prepare_entries {
     my $plugins = $self->plugins;
 
     # update entries
-    for my $entry ( sort { $b->lastmod <=> $a->lastmod } @{ $entries->index } ) {
-        $plugins->run_plugins('update' => $entry);
-    }
+    $plugins->run_plugins( update => $entries );
 
     my %args    = ();
 
