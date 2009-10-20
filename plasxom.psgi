@@ -388,6 +388,33 @@ sub finalize {
     $self->plugins->run_plugins('end');
 }
 
+sub application {
+    my ( $class ) = @_;
+
+    $class->setup;
+
+    my %config  = %{ $class->server };
+    my $mws     = delete $config{'middleware'} || [];
+
+    my $app     = $class->can('handler');
+
+    for my $mw ( @{ $mws } ) {
+        my ( $mwclass, @args ) = @{ $mw };
+
+        my ( $failed, $error );
+        do {
+            local $@;
+            my $failed = not eval "use ${mwclass}; 1";
+            my $error  = $@;
+        };
+        die "Failed to load Plack middleware class: ${mwclass}: ${error}" if ( $failed );
+
+        $app = $mwclass->wrap( $app, @args );
+    }
+
+    return $app;
+}
+
 1;
 
 package plasxom::hash;
@@ -2104,25 +2131,12 @@ sub format_tags {
 
 package main;
 
+return plasoxm->application if ( ! plasxom::util::env_value('libmode') );
+
 use Plack::Builder;
 
 my $libmode = plasxom::util::env_value('libmode');
-
-if ( ! $libmode ) {
-    plasxom->setup;
-
-    my %config  = %{ plasxom->server };
-    my $mws     = delete $config{'middleware'} || [];
-
-    my $app     = builder {
-        for my $mw ( @{ $mws } ) {
-            enable( @{ $mw } );
-        }
-        return plasxom->can('handler');
-    };
-
-    return $app;
-}
+return plasxom->application if ( ! $libmode );
 
 1;
 
