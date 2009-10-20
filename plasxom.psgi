@@ -2133,11 +2133,6 @@ package main;
 
 return plasoxm->application if ( ! plasxom::util::env_value('libmode') );
 
-use Plack::Builder;
-
-my $libmode = plasxom::util::env_value('libmode');
-return plasxom->application if ( ! $libmode );
-
 1;
 
 __END__
