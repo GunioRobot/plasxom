@@ -24,7 +24,7 @@ my $plugin  = plasxom::plugin::datesection->new( config => {}, state => $example
 
 isa_ok( $plugin, 'plasxom::plugin::datesection' );
 
-$plugin->entries( $app, [] );
+$plugin->update( $app, [] );
 
 is( $entries->entry( path => 'foo/BBB' )->stash->{'datesection'}, 1 );
 is( $entries->entry( path => 'foo/CCC' )->stash->{'datesection'}, 2 );
