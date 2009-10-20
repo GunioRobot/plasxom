@@ -926,28 +926,6 @@ sub filter {
         }
     }
 
-
-    if ( scalar( keys %{ $meta } ) ) {
-        for my $key ( sort keys %{ $meta } ) {
-            my $value = $meta->{$key};
-            Carp::croak "Argument 'meta->{'$key'}' does not set compare value." if ( ! defined $value );
-            FILES: for my $fn ( keys %new ) {
-                my $metadata = $new{$fn}->meta->{$key};
-                if ( ! defined $metadata ) {
-                    delete $new{$fn};
-                    next FILES;
-                }
-
-                if ( ref $value eq 'Regexp' ) {
-                    delete $new{$fn} if ( $metadata !~ $value );
-                }
-                else {
-                    delete $new{$fn} if ( $metadata ne $value );
-                }
-            }
-        }
-    }
-
     # filter tag
     if ( defined $tag && ref $tag eq 'HASH' ) {
         my $words = $tag->{'words'} || [];
