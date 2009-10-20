@@ -1,0 +1,27 @@
+package plasxom::plugin::paginate;
+
+use strict;
+use warnings;
+
+use base qw( plasxom::plugin );
+
+sub templatize {
+    my ( $self, $app, $ctt_ref, $tmpl_ref, $vars ) = @_;
+
+    my $entries = $app->entries;
+    my $flavour = $app->flavour;
+
+    my %var;
+       $var{'total'}        = $entries->total_page( path => $flavour->fullpath );
+       $var{'current'}      = ( ( $flavour->page || q{} ) =~ m{^(\d+)$} )[0];
+       $var{'current'}    ||= 1;
+       $var{'previous'}     = $var{'current'} - 1 if ( $var{'current'} > 1 );
+       $var{'next'}         = $var{'current'} + 1 if ( $var{'current'} + 1 <= $var{'total'} );
+       $var{'paginated'}    = 1 if ( $var{'current'} > 1 );
+
+    $vars->{'paginate'}     = { %var };
+
+    return 1;
+}
+
+1;
