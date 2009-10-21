@@ -1,0 +1,56 @@
+package plasxom::plugin::categories;
+
+use strict;
+use warnings;
+
+use base qw( plasxom::plugin );
+
+sub update {
+    my ( $self, $app, $entries ) = @_;
+
+    my %children    = ();
+    my %count       = ();
+    for my $entry ( sort { $a->path cmp $b->path } @{ $entries->index } ) {
+        my $path    = $entry->path;
+        my @path    = split m{/}, $path;
+
+        $count{$path} ||= 0;
+        $count{$path}++;
+
+        while ( my $child = pop @path ) {
+            my $parent = join q{/}, @path;
+            $children{$parent} ||= [];
+            $count{$parent}++;
+
+            my $dir = $parent;
+               $dir .= '/' if ( $dir ne q{} );
+               $dir .= $child;
+
+            push @{ $children{$parent} }, $dir;
+        }
+    }
+
+    for my $root ( keys %children ) {
+        $children{$root} = do {
+            my %t = ();
+            [ sort { $a cmp $b }  grep { ! $t{$_}++ } @{ $children{$root} }];
+        }
+    }
+
+    $self->{'vars'} = {
+        children    => { %children },
+        count       => { %count },
+    };
+
+    return 1;
+}
+
+sub templatize {
+    my ( $self, $app, $ctt_ref, $tmpl_ref, $vars ) = @_;
+    $vars->{'categories'} = $self->{'vars'};
+
+    return 1;
+}
+
+
+1;
