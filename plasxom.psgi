@@ -1597,7 +1597,7 @@ for my $prop ( qw( body summary ) ) {
 
                 if ( exists $stash->{'formatter'} && exists $stash->{'method'} ) {
                     my ( $formatter, $method ) = @{ $stash }{qw( formatter method )};
-                    $body = $formatter->$method( $self );
+                    $body = $formatter->$method( $self, $prop );
                 }
 
                 $self->{'property'}->{$prop} = $body
