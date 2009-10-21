@@ -1,0 +1,31 @@
+package plasxom::plugin::old;
+
+use strict;
+use warnings;
+
+use base qw( plasxom::plugin );
+
+sub update {
+    my ( $self, $app, $entries ) = @_;
+    my $today   = time;
+
+    for my $entry ( @{ $entries->index } ) {
+        my $stash   = $entry->stash;
+        my $sec     = $today - $entry->date->epoch;
+
+        my %vars    = (
+            year    => int( $sec / 31556926 ),
+            month   => int( $sec /  2629744 ),
+            day     => int( $sec /    86400 ),
+            hour    => int( $sec /     3600 ),
+            minute  => int( $sec /       60 ),
+            second  => $sec,
+        );
+
+        for my $key ( keys %vars ) {
+            $stash->{"old.${key}"} = $vars{$key};
+        }
+    }
+}
+
+1;
