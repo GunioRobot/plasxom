@@ -5,6 +5,37 @@ use warnings;
 
 use base qw( plasxom::plugin );
 
+sub init {
+    my ( $self ) = @_;
+
+    my $alias = $self->config->{'alias'} || {};
+
+    if ( ref $alias ne 'HASH' ) {
+        warn "Category label alias settings ( config->{'alias'} ) is not HASH reference.";
+        $alias = {};
+    }
+
+    $self->{'alias'} = $alias;
+}
+
+sub setup {
+    my ( $self, $app ) = @_;
+
+    $app->api->register(
+        $self,
+        'category.label' => $self->can('label'),
+    );
+
+    return 1;
+}
+
+sub label {
+    my ( $self, $label ) = @_;
+    my $alias = $self->{'alias'};
+
+    return ( exists $alias->{$label} ) ? $alias->{$label} : $label ;
+}
+
 sub update {
     my ( $self, $app, $entries ) = @_;
 

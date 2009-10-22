@@ -4,7 +4,7 @@ use strict;
 use warnings;
 
 use t::Util qw( require_plasxom require_plugin $example );
-use Test::More tests => 3;
+use Test::More tests => 7;
 
 require_plasxom;
 require_plugin('categories');
@@ -21,9 +21,26 @@ my $entries = plasxom::entries->new(
 plasxom->entries( $entries );
 
 my $app     = plasxom->new;
-my $plugin  = plasxom::plugin::categories->new( config => {}, state => $example->subdir('plugin/categories/state') );
+my $plugin  = plasxom::plugin::categories->new(
+    config => { alias => { foo => 'FOO' } },
+    state => $example->subdir('plugin/categories/state'),
+);
 
 isa_ok( $plugin, 'plasxom::plugin::categories' );
+is_deeply(
+    $plugin->{'alias'},
+    { foo => 'FOO' },
+);
+
+is( $plugin->label('foo'), 'FOO' );
+is( $plugin->label('bar'), 'bar' );
+
+$plugin->setup('plasxom');
+
+is_deeply(
+    plasxom->api->{'API'}->{'category.label'},
+    { instance => $plugin, function => $plugin->can('label') },
+);
 
 $plugin->update( $app, $entries );
 
