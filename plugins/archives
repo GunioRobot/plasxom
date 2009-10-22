@@ -1,0 +1,31 @@
+package plasxom::plugin::archives;
+
+use strict;
+use warnings;
+
+use base qw( plasxom::plugin );
+
+sub update {
+    my ( $self, $app, $entries ) = @_;
+
+    my %archives = ();
+
+    for my $entry ( @{ $entries->index } ) {
+        my $date    = $entry->date;
+        my $year    = $date->year;
+        my $month   = $date->month;
+        $archives{$year} ||= { count => 0, month => {} };
+        $archives{$year}->{'count'}++;
+        $archives{$year}->{'month'}->{$month} ||= 0;
+        $archives{$year}->{'month'}->{$month}++;
+    }
+
+    $self->{'archives'} = { %archives };
+}
+
+sub templatize {
+    my ( $self, $app, $ctt_ref, $tmpl_ref, $vars ) = @_;
+    $vars->{'archives'} = $self->{'archives'};
+}
+
+1;
