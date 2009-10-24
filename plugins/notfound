@@ -1,0 +1,18 @@
+package plasxom::plugin::notfound;
+
+use strict;
+use warnings;
+
+use base qw( plasxom::plugin );
+
+sub entries {
+    my ( $self, $app, $entries ) = @_;
+
+    if ( @{ $entries } == 0 || $app->flavour->no_matched ) {
+        $app->res->status(404);
+    }
+
+    return 1;
+}
+
+1;
