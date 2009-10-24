@@ -1803,15 +1803,12 @@ sub fullpath {
     my $path        = $self->path       || q{};
     my $filename    = $self->filename   || q{};
     my $flavour     = $self->flavour    || q{};
-    
+
        $filename  &&= "/${filename}";
        $flavour   &&= ".${flavour}";
+       $filename  &&= "${filename}${flavour}";
 
-    my $fullpath    = $path;
-       $fullpath   .= $filename;
-       $fullpath  &&= "${fullpath}${flavour}";
-
-    return $fullpath;
+    return "${path}${filename}";
 }
 
 1;
