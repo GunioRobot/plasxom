@@ -42,7 +42,7 @@ my $dispatcher = plasxom::dispatcher->new(
     },
 );
 
-my $req     = Plack::Request->new({ 'psgi.url_scheme' => 'http', HTTP_HOST => 'localhost', PATH_INFO => '/2009/01/10.html', REQUEST_METHOD => 'POST', });
+my $req     = Plack::Request->new({ 'psgi.url_scheme' => 'http', HTTP_HOST => 'localhost', PATH_INFO => '/2009/01/10.html', REQUEST_METHOD => 'POST', QUERY_STRING => 'page=5&foo=bar' });
 my $flav    = $dispatcher->dispatch( $req );
 
 is( $flav->url, 'http://localhost' );

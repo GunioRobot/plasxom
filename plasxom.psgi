@@ -1888,7 +1888,10 @@ sub dispatch {
     my $uri         = $req->uri;
 
     # url
-    my $url = "$uri";
+    my $url = q{};
+       $url .= $req->env->{'psgi.url_scheme'} || 'http';
+       $url .= '://' . $uri->host;
+       $url .= '/' . $uri->path;
 
     my $len = length($path_info);
     my $frg = substr( $url, -$len );
