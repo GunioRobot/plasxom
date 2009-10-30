@@ -460,6 +460,351 @@ sub call {
     return $function->( $instance, @args );
 }
 
+1;
+
+package plasxom::template;
+
+use Carp ();
+
+sub new {
+    my ( $class, %args ) = @_;
+
+    my $loader      = delete $args{'source'}    or Carp::croak "Argument 'source' is not specified.";
+    my $renderer    = delete $args{'renderer'}  or Carp::croak "Argument 'renderer' is not specified.";
+    my $path        = delete $args{'path'}      or Carp::croak "Argument 'path' is not specified.";
+
+    my $self = bless {
+        source      => q{},
+        compiled    => undef,
+        loader      => $loader,
+        renderer    => $renderer,
+        path        => $path,
+        lastmod     => 0,
+    }, $class;
+
+    return $self;
+}
+
+sub path { $_[0]->{'path'} }
+
+sub source {
+    my $self = shift;
+
+    if ( @_ ) {
+        my $source = shift @_;
+        undef($self->{'compiled'});
+        $self->{'source'} = $source;
+    }
+    else {
+        $self->load if ( ! $self->loaded );
+        return $self->{'source'};
+    }
+}
+
+sub compiled {
+    my ( $self ) = @_;
+
+    my $compiled = $self->{'compiled'};
+    return $compiled if ( ref $compiled eq 'CODE' );
+
+    $compiled = $self->{'renderer'}->compile( $self->source );
+    $self->{'compiled'} = $compiled;
+
+    return $compiled;
+}
+
+sub render {
+    my ( $self, @args ) = @_;
+    return $self->compiled->( @args );
+}
+
+sub load {
+    my ( $self, %args ) = @_;
+    my $reload = exists $args{'reload'} && !! $args{'reload'} ;
+    return 1 if ( ! $reload && $self->loaded );
+
+    my $loader  = $self->{'loader'};
+    my $path    = $self->path;
+
+    if ( $loader->exists( path => $path ) ) {
+        $self->{'source'}   = $loader->select( path => $path );
+        $self->{'lastmod'}  = $loader->stat( path => $path )->{'lastmod'};
+        $self->loaded(1);
+    }
+    else {
+        Carp::carp "Template '${path}' does not exists.";
+        return;
+    }
+}
+sub loaded {
+    my $self = shift;
+
+    if ( @_ ) {
+        $self->{'loaded'} = shift @_;
+    }
+    else {
+        return $self->{'loaded'};
+    }
+
+}
+
+sub reload {
+    my ( $self ) = @_;
+    $self->load( reload => 1 );
+}
+
+sub commit {
+    my ( $self ) = @_;
+    my $path    = $self->path;
+    my $loader  = $self->{'loader'};
+
+    my $method  = ( $loader->exists( path => $path ) ) ? 'update' : 'create' ;
+    $loader->$method( path => $path, source => $self->{'source'} );
+    $self->{'lastmod'} = $loader->stat( path => $path )->{'lastmod'};
+
+    return 1;
+}
+
+sub remove {
+    my ( $self ) = @_;
+    return $self->{'loader'}->remove( path => $self->path );
+}
+
+sub lastmod { $_[0]->{'lastmod'} }
+
+sub is_modified_source {
+    my ( $self ) = @_;
+
+    my $loader  = $self->{'loader'};
+    my $stat    = $loader->stat( path => $self->path );
+    my $lastmod = $self->lastmod;
+
+    return ( ! exists $stat->{'lastmod'} || $stat->{'lastmod'} != $lastmod );
+}
+1;
+
+package plasxom::templates;
+
+sub new {
+    my ( $class, %args ) = @_;
+
+    my $source      = delete $args{'source'} or Carp::croak "Argument 'source' is not specified.";
+    my $renderer    = delete $args{'renderer'} or Carp::croak "Argument 'renderer' is not specified.";
+
+    my $self = bless {
+        source      => $source,
+        renderer    => $renderer,
+        template    => {},
+    }, $class;
+
+    return $self;
+}
+
+sub source      { $_[0]->{'source'}     }
+sub renderer    { $_[0]->{'renderer'}   }
+sub template    { $_[0]->{'template'}   }
+
+sub load {
+    my ( $self, $path ) = @_;
+
+    $path =~ s{/+}{/}g;
+    $path =~ s{^/*}{};
+
+    my $template = $self->template;
+
+    if ( ! exists $template->{$path} ) {
+        $template->{$path} = plasxom::template->new( source => $self->source, renderer => $self->renderer, path => $path );
+    }
+
+    return $template->{$path};
+}
+
+sub dispatch {
+    my ( $self, $path, $chunk, $flavour ) = @_;
+
+    $path =~ s{/+}{/}g;
+    $path =~ s{^/*}{};
+    $path =~ s{/*$}{};
+
+    my $source  = $self->source;
+
+    do {
+        my $full = "${path}/${chunk}.${flavour}";
+        if ( $source->exists( path => $full ) ) {
+            return $self->load( $full );
+        }
+    }
+    while ( $path =~ s{/*([^/]*)$}{} && $1 );
+
+    return $self->load( "${chunk}.${flavour}" );
+}
+
+1;
+
+package plasxom::template::source;
+
+use Carp ();
+
+sub new {
+    my ( $class, @args ) = @_;
+    my $self = bless { config => {} }, $class;
+
+    $self->init( @args );
+
+    return $self;
+}
+
+sub config { $_[0]->{'config'} }
+
+for my $method (qw( init create update select remove exists stat )) {
+    no strict 'refs';
+    *{$method} = sub { Carp::croak __PACKAGE__ . "::${method} is not implemented." };
+}
+
+1;
+
+package plasxom::template::source::file;
+
+use Carp ();
+use Path::Class ();
+use base qw( plasxom::template::source );
+
+sub init {
+    my ( $self, %args ) = @_;
+
+    my $root_dir = delete $args{'root_dir'} or Carp::croak "Argument 'root_dir' is not specified.";
+       $root_dir = Path::Class::dir($root_dir)->absolute->cleanup;
+
+    $self->{'root_dir'} = $root_dir;
+}
+
+sub root_dir { $_[0]->{'root_dir'} }
+
+sub create {
+    my ( $self, %args ) = @_;
+
+    my $path = delete $args{'path'} or Carp::croak "Argument 'path' is not specified.";
+    Carp::croak "${path} is already exists." if ( $self->exists( path => $path ) );
+
+    return $self->update( path => $path, %args );
+}
+
+sub update {
+    my ( $self, %args ) = @_;
+
+    my $path    = delete $args{'path'} or Carp::croak "Argument 'path' is not specified.";
+    my $source  = delete $args{'source'} or Carp::croak "Argument 'source' is not specified.";
+    my $file    = $self->root_dir->file($path);
+
+    if ( ! -d $file->dir ) {
+        $file->dir->mkpath;
+    }
+
+    my $fh = $file->openw or Carp::croak "Failed to open file: ${file}: ${!}";
+    print $fh $source;
+    $fh->close;
+
+    return 1;
+}
+
+sub select {
+    my ( $self, %args ) = @_;
+
+    my $path = delete $args{'path'} or Carp::croak "Argument 'path' is not specified.";
+
+    if ( $self->exists( path => $path ) ) {
+        my $file    = $self->root_dir->file($path);
+        my $fh      = $file->openr or Carp::croak "Failed to open file: $file: $!";
+        my $source  = do { local $/; <$fh> };
+        $fh->close;
+
+        return $source;
+    }
+    return q{};
+}
+
+sub remove {
+    my ( $self, %args ) = @_;
+
+    my $path = delete $args{'path'} or Carp::croak "Argument 'path' is not specified.";
+
+    if ( $self->exists( path => $path ) ) {
+        my $file = $self->root_dir->file($path);
+        return $file->remove();
+    }
+    else {
+        Carp::carp("${path} does not exists.");
+        return;
+    }
+
+}
+
+sub exists {
+    my ( $self, %args ) = @_;
+    my $path = delete $args{'path'} or Carp::croak "Argument 'path' is not specified.";
+
+    if ( -e $self->root_dir->file($path) && -r _ ) {
+        return 1;
+    }
+
+    return 0;
+}
+
+sub stat {
+    my ( $self, %args ) = @_;
+    my $path = delete $args{'path'} or Carp::croak "Argument 'path' is not specified.";
+
+    if ( $self->exists( path => $path ) ) {
+        return { lastmod => $self->root_dir->file($path)->stat->mtime };
+    }
+
+    return { notfound => 1 };
+}
+
+1;
+
+package plasxom::template::renderer;
+
+sub new {
+    my ( $class, @args ) = @_;
+    my $self = bless { config => {} }, $class;
+
+    $self->init( @args );
+
+    return $self;
+}
+
+for my $method (qw( init compile )) {
+    no strict 'refs';
+    *{$method} = sub { __PACKAGE__ . "::${method} is not implemented." };
+}
+
+sub render {
+    my ( $self, $template, @vars ) = @_;
+    return $self->compile( $template )->( @vars );
+}
+
+1;
+
+package plasxom::template::renderer::microtemplate;
+
+use Text::MicroTemplate ();
+
+use base qw( plasxom::template::renderer );
+
+sub compile {
+    my ( $self, $source ) = @_;
+
+    my $compiled = Text::MicroTemplate::build_mt($source);
+
+    return sub {
+        my @args = @_;
+        return $compiled->( @args )->as_string;
+    };
+}
+
+1;
+
 package plasxom::cache;
 
 use Carp ();
