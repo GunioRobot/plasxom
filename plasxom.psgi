@@ -14,7 +14,7 @@ use Plack::Response;
 our $VERSION = '0.02';
 
 my %stash = ();
-for my $property ( qw( config plugins methods vars cache entries entries_schema_class server dispatcher api ) ) {
+for my $property ( qw( config plugins templates vars cache entries entries_schema_class template_source_class template_renderer_class server dispatcher api ) ) {
     no strict 'refs';
     *{$property} = sub {
         my $class = shift;
@@ -24,14 +24,6 @@ for my $property ( qw( config plugins methods vars cache entries entries_schema_
         else {
             return $stash{$property};
         }
-    };
-}
-
-for my $method ( qw( template interpolate ) ) {
-    no strict 'refs';
-    *{$method} = sub {
-        my ( $app, @args ) = @_;
-        return $app->methods->{$method}->( $app, @args );
     };
 }
 
@@ -57,44 +49,9 @@ __PACKAGE__->vars( plasxom::hash->new() );
 
 __PACKAGE__->api( plasxom::api->new() );
 
-__PACKAGE__->methods({
-    template    => sub {
-        my ( $app, $path, $chunk, $flavour ) = @_;
-
-        my $dir    = eval { $app->config->{'flavour'}->{'dir'} };
-        Carp::croak "plasxom->config->{'flaovur'}->{'dir'} is not specified." if ( $@ );
-           $dir    = Path::Class::dir($dir);
-
-           $path ||= q{};
-           $path =~ s{/+}{/}g;
-           $path =~ s{^/}{};
-           $path =~ s{/$}{};
-
-            do {
-                my $file = $dir->file($path, "${chunk}.${flavour}");
-                if ( -e $file && -r _ ) {
-                    my $fh = $file->openr;
-                    my $data = do { local $/; <$fh> };
-                    return $data;
-                }
-            }
-            while ( $path =~ s{/*([^/]*)$}{} && $1 );
-
-        return;
-    },
-    interpolate => sub {
-        my ( $app, $template, $vars ) = @_;
-
-        $vars ||= {};
-
-        my $ret = eval { Text::MicroTemplate::render_mt( $template, $app, $vars )->as_string };
-           $ret = "Interpolate error: $@" if ( $@ );
-
-        return $ret;
-    },
-});
-
 __PACKAGE__->entries_schema_class('plasxom::entries::blosxom');
+__PACKAGE__->template_source_class('plasxom::template::source::file');
+__PACKAGE__->template_renderer_class('plasxom::template::renderer::microtemplate');
 
 sub setup {
     my ( $class ) = @_;
@@ -103,7 +60,7 @@ sub setup {
     $class->setup_vars;
     $class->setup_cache;
     $class->setup_plugins;
-    $class->setup_methods;
+    $class->setup_templates;
     $class->setup_entries;
     $class->setup_dispatcher;
     $class->setup_engine;
@@ -161,15 +118,21 @@ sub setup_plugins {
     $plugins->setup;
 }
 
-sub setup_methods {
+sub setup_templates {
     my ( $class ) = @_;
 
-    for my $method ( keys %{ $class->methods } ) {
-        if ( ref( my $sub = $class->plugins->run_plugin_first( $method ) ) eq 'CODE' ) {
-            $class->methods->{$method} = $sub;
-        }
-    }
+    my $source_class    = $class->template_source_class || 'plasxom::template::source::file';
+    my %source_config   = %{ $class->config->{'template'}->{'source'} || {} };
 
+    my $renderer_class  = $class->template_renderer_class || 'plasxom::template::renderer::microtemplate';
+    my %renderer_config = %{ $class->config->{'template'}->{'renderer'} || {} };
+
+    my $source      = $source_class->new( %source_config );
+    my $renderer    = $renderer_class->new( %renderer_config );
+
+    my $tmpls = plasxom::templates->new( source => $source, renderer => $renderer );
+
+    $class->templates( $tmpls );
 }
 
 sub setup_entries {
@@ -358,26 +321,30 @@ sub templatize {
 
     my $flavour     = $self->flavour;
     my $plugins     = $self->plugins;
+    my $templates   = $self->templates;
 
     my $path_info   = $flavour->path_info || q{};
     my $flav_ext    = $flavour->flavour;
 
-    my $content_type    = $self->template( $path_info, 'content_type', $flav_ext ) || 'text/plain; charset=UTF-8';
-       $content_type    =~ s{\n.*}{};
+    my $content_type    = $templates->dispatch( $path_info, 'content_type', $flav_ext );
+    my $ctt_source      = $content_type->source;
+       $ctt_source      =~ s{\n.*}{}s;
+    $content_type->source( $ctt_source );
 
-    my $template        = $self->template( $path_info, 'template', $flav_ext );
+    my $template        = $templates->dispatch( $path_info, 'template', $flav_ext );
     my $vars            = {
         entries => $self->entries->filtered,
         flavour => $flavour,
     };
 
-    $plugins->run_plugins('templatize', \$content_type, \$template, $vars);
+    $plugins->run_plugins('templatize', $content_type, $template, $vars);
 
-    my $output = $self->interpolate( $template, $vars );
+    my $ctt    = $content_type->render( $self, $vars );
+    my $output = $template->render( $self, $vars );
 
-    $plugins->run_plugins('output', \$output);
+    $plugins->run_plugins('output', \$ctt, \$output);
 
-    $self->res->header('Content-Type' => $content_type);
+    $self->res->content_type($ctt);
     $self->res->body( $output );
 }
 

@@ -8,7 +8,7 @@ use Test::More;
 
 require_plasxom;
 
-my @properties = qw( config plugins methods vars cache entries entries_schema_class server dispatcher api );
+my @properties = qw( config plugins templates vars cache entries entries_schema_class template_source_class template_renderer_class server dispatcher api );
 
 plan tests => 1 + scalar(@properties);
 

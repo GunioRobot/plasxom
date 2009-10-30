@@ -8,7 +8,7 @@ use Test::More;
 
 require_plasxom;
 
-our @phase = qw( config vars cache plugins methods entries dispatcher engine );
+our @phase = qw( config vars cache plugins templates entries dispatcher engine );
 
 plan tests => scalar(@phase);
 

@@ -4,7 +4,7 @@ use strict;
 use warnings;
 
 use t::Util qw( require_plasxom $example );
-use Test::More tests => 3 + 1 + 3 + 2 ;
+use Test::More tests => 6;
 
 require_plasxom;
 
@@ -24,33 +24,7 @@ isa_ok( plasxom->api, 'plasxom::api' );
 
 is( plasxom->entries_schema_class, 'plasxom::entries::blosxom' );
 
-# default method 'template';
+# default template classes
 
-my $dir = $example->subdir('core/basic/template')->absolute->cleanup;
-
-plasxom->config->merge(
-    flavour => {
-        dir => $dir,
-    },
-);
-
-my $tmpl = plasxom->template('bar/baz', 'foo', 'html');
-
-is( $tmpl, 'foo' );
-
-$tmpl = plasxom->template('bar/baz/foo/bar/', 'bar', 'html');
-
-is( $tmpl, 'bar' );
-
-$tmpl = plasxom->template( '', 'baz', 'html' );
-
-is( $tmpl, 'baz' );
-
-# default method 'interpolate';
-
-is(
-    plasxom->interpolate(q{<?= $_[0] ?>-<?= $_[1]->{'foo'} ?>}, { foo => 'bar' }),
-    'plasxom-bar'
-);
-
-like( plasxom->interpolate(q{<?= }), qr{Interpolate error:} );
+is( plasxom->template_source_class, 'plasxom::template::source::file' );
+is( plasxom->template_renderer_class, 'plasxom::template::renderer::microtemplate' );
