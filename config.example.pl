@@ -15,10 +15,15 @@ return {
     },
 
     flavour     => {
-        dir     => "${basedir}/flavours",
         default => 'html',
     },
 
+    template    => {
+        source      => {
+            root_dir => "${basedir}/flavours",
+        },
+        renderer    => {},
+    }
 
     # cache       => {
     #     class   => 'Ccahe::FileCache',
