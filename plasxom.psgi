@@ -1580,6 +1580,9 @@ sub remove {
        $path = $self->entry_path($path);
 
     if ( $self->exists( path => $path ) ) {
+        if ( $self->use_cache ) {
+            $self->{'cache'}->remove("plasxom-entries-blosxom:${path}");
+        }
         my $file = $self->entries_dir->file( "${path}." . $self->file_extension );
         return $file->remove();
     }
