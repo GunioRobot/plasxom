@@ -246,6 +246,20 @@ sub prepare_entries {
     my $entries = $self->entries;
     my $plugins = $self->plugins;
 
+    # reload index
+    for my $entry ( @{ $entries->index } ) {
+        if ( ! $entries->exists( path => $entry->fullpath ) ) {
+            $entries->reindex;
+        }
+    }
+
+    # reload entry
+    for my $entry ( @{ $entries->index } ) {
+        if ( $entry->is_modified_source ) {
+            $entry->reload;
+        }
+    }
+
     # update entries
     $plugins->run_plugins( update => $entries );
 
