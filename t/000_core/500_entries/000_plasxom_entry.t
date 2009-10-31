@@ -33,6 +33,7 @@ plan tests =>
     + 2 + 2 + (scalar(@props) * 5) + ( 2 * 6 )  # property test
     + 5 + ( (scalar(@props) + 2) * 2)           # clear test
     + 2 + 1                                     # commit test
+    + 1                                         # remove test
     + 2 + 2 + ( scalar(@props) * 2 )            # reload test
     + 6                                         # is_modified_source test
     + 3                                         # path bug fix
@@ -71,6 +72,13 @@ plan tests =>
 
     sub stat {
         return $main::stat;
+    }
+
+    sub remove {
+        our ( $class, %args ) = @_;
+        package main;
+        
+        is( $TestLoader::args{'path'}, '/path/to/entry' );
     }
 
     1;
@@ -164,6 +172,9 @@ $entry->clear_all;
 $entry->load;
 
 $entry->commit;
+
+# remove test
+$entry->remove;
 
 # reload test
 $entry = plasxom::entry->new( path => '/path/to/entry', db => 'TestLoader' );

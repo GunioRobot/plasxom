@@ -2070,6 +2070,11 @@ sub is_modified_source {
     }
 }
 
+sub remove {
+    my ( $self ) = @_;
+    return $self->db->remove( path => $self->fullpath );
+}
+
 1;
 
 package plasxom::flavour;
