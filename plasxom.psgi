@@ -1356,7 +1356,7 @@ sub new {
 sub config { $_[0]->{'config'} }
 sub init   { Carp::croak __PACKAGE__ . "::init is not implemented." }
 
-for my $method (qw( create update select remove exists index )) {
+for my $method (qw( create update select remove exists index stat )) {
     no strict 'refs';
     *{$method} = sub { Carp::croak __PACKAGE__ . "::${method} is not implemented." };
 }
@@ -1595,6 +1595,19 @@ sub exists {
     }
 
     return 0;
+}
+
+sub stat {
+    my ( $self, %args ) = @_;
+
+    my $path = delete $args{'path'} or Carp::croak "Argument 'path' is not specified.";
+       $path = $self->entry_path($path);
+
+    if ( $self->exists( path => $path ) ) {
+        return { lastmod => $self->entries_dir->file("${path}." . $self->file_extension)->stat->mtime },
+    }
+
+    return { notfound => 1 };
 }
 
 sub index  {

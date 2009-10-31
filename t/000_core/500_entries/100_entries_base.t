@@ -38,7 +38,7 @@ is_deeply( $entries->config, {} );
 
 can_ok(
     $entries,
-    qw( create update select remove exists index ),
+    qw( create update select remove exists index stat ),
 );
 
 our %entry = (

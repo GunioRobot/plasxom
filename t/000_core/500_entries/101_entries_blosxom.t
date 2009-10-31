@@ -9,7 +9,7 @@ use File::Temp;
 use Test::Warn;
 use Test::More
     tests => 1 + 3 + 2 + 2 + 1 + 1 + 1 
-           + 2 + 3 + 7
+           + 2 + 3 + 2 + 7
            + 1 + 2 + 1 + 2
            + 1;
 
@@ -94,7 +94,7 @@ is_deeply(
     },
 );
 
-# select, exists and index tests
+# select, exists, stat and index tests
 $db = plasxom::entries::blosxom->new( %args, depth => 1 );
 
 # exists
@@ -115,6 +115,17 @@ is_deeply(
         lastmod         => stat($datadir->file('foo.txt'))->mtime,
         meta            => { foo => 'bar', bar => 'baz' },
     }
+);
+
+# stat
+is_deeply(
+    $db->stat( path => 'foo' ),
+    { lastmod => $datadir->file('foo.txt')->stat->mtime },
+);
+
+is_deeply(
+    $db->stat( path => 'notfound' ),
+    { notfound => 1 },
 );
 
 # index
