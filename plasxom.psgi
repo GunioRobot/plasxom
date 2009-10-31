@@ -2049,6 +2049,27 @@ sub commit {
     );
 }
 
+sub is_modified_source {
+    my ( $self ) = @_;
+
+    if ( $self->db->exists( path => $self->fullpath ) ) {
+        my $lastmod = $self->lastmod;
+        my $stat    = $self->db->stat( path => $self->fullpath );
+        if ( ! exists $stat->{'lastmod'} || $stat->{'lastmod'} != $lastmod ) {
+            return 1;
+        }
+        else {
+            return 0;
+        }
+    }
+    elsif ( !! $self->loaded ) {
+        return 1;
+    }
+    else {
+        return 0;
+    }
+}
+
 1;
 
 package plasxom::flavour;

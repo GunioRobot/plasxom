@@ -20,6 +20,8 @@ our %entry = (
     meta            => {},
 );
 
+our $stat = {};
+
 my @props = keys %entry;
 
 plan tests =>
@@ -32,6 +34,7 @@ plan tests =>
     + 5 + ( (scalar(@props) + 2) * 2)           # clear test
     + 2 + 1                                     # commit test
     + 2 + 2 + ( scalar(@props) * 2 )            # reload test
+    + 6                                         # is_modified_source test
     + 3                                         # path bug fix
     ;
 
@@ -64,6 +67,10 @@ plan tests =>
 
         is_deeply( \%entry, \%TestLoader::args );
 
+    }
+
+    sub stat {
+        return $main::stat;
     }
 
     1;
@@ -171,6 +178,17 @@ for my $prop ( @props ) {
     is_deeply( $entry->$prop, $entry{$prop} );
 }
 
+# is_modified_source
+
+$stat->{'lastmod'} = 1;
+ok( ! $entry->is_modified_source );
+
+$stat = { notfound => 1 };
+ok( $entry->is_modified_source );
+
+$stat = { lastmod => 2 };
+ok( $entry->is_modified_source );
+
 # path bug fix
 
 $entry = plasxom::entry->new(
@@ -181,3 +199,5 @@ $entry = plasxom::entry->new(
 is( $entry->path,           q{}     );
 is( $entry->filename,       'foo'   );
 is( $entry->fullpath,       'foo'   );
+
+
