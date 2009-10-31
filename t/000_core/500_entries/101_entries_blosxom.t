@@ -10,7 +10,7 @@ use Test::Warn;
 use Test::More
     tests => 1 + 3 + 2 + 2 + 1 + 1 + 1 
            + 2 + 3 + 2 + 7
-           + 1 + 2 + 1 + 2
+           + 1 + 2 + 1 + 1 + 2 + 1
            + 1;
 
 
@@ -334,9 +334,46 @@ is_deeply(
         }
     );
 
+    # index
+    is_deeply(
+        { $db->index },
+        {
+            'foo'   => {
+                title           => 'title',
+                pagename        => 'foobarbaz',
+                tags            => [qw( foo bar baz )],
+                meta            => { foo => 'bar', bar => 'baz' },
+                created         => stat($db->entries_dir->file('foo.txt'))->mtime,
+                lastmod         => stat($db->entries_dir->file('foo.txt'))->mtime,
+            },
+            'bar/baz'   => {
+                title           => 'title',
+                pagename        => 'foobarbaz',
+                tags            => [qw( foo bar baz )],
+                meta            => { foo => 'bar', bar => 'baz' },
+                created         => stat($db->entries_dir->file('bar/baz.txt'))->mtime,
+                lastmod         => stat($db->entries_dir->file('bar/baz.txt'))->mtime,
+            },
+        },
+    );
+
     # remove
     ok( $db->remove( path => 'foo' ) );
     ok( ! $db->exists( path => 'foo' ) );
+
+    is_deeply(
+        { $db->index },
+        {
+            'bar/baz'   => {
+                title           => 'title',
+                pagename        => 'foobarbaz',
+                tags            => [qw( foo bar baz )],
+                meta            => { foo => 'bar', bar => 'baz' },
+                created         => stat($db->entries_dir->file('bar/baz.txt'))->mtime,
+                lastmod         => stat($db->entries_dir->file('bar/baz.txt'))->mtime,
+            },
+        }
+    );
 }
 
 $db = plasxom::entries::blosxom->new( %args, readonly => 1 );

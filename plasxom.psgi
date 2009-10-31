@@ -1619,6 +1619,7 @@ sub index  {
     my $root        = $self->entries_dir->as_foreign('Unix')->stringify;
 
     my %index       = ();
+    my %new         = ();
 
     if ( $use_index && -e $index_file && -r _ ) {
         my $data = eval { do $index_file->stringify } || {};
@@ -1637,7 +1638,6 @@ sub index  {
             return if ( ! -r $file );
             return if ( $file !~ m{\.$fe$} );
 
-
             my $path = $file;
                $path =~ s{^$root/}{};
                $path =~ s{\.$fe$}{};
@@ -1645,19 +1645,22 @@ sub index  {
             my $file_depth = ( $path =~ tr{/}{} ) + 1;
 
             if ( $depth && $file_depth > $depth ) {
-                delete $index{$path};
                 return;
             }
 
             my $mtime = File::stat::stat($file)->mtime;
-            if ( ! exists $index{$path} || $index{$path}->{'lastmod'} != $mtime  ) {
+
+            if ( ! exists $index{$path} || $index{$path}->{'lastmod'} != $mtime ) {
                 my %data = $self->select( path => $path );
                 delete $data{'body_source'};
                 delete $data{'summary_source'};
-                $index{$path} = {
+                $new{$path} = {
                     %data,
                     lastmod => $mtime,
                 };
+            }
+            else {
+                $new{$path} = $index{$path};
             }
         },
         $root,
@@ -1665,7 +1668,7 @@ sub index  {
 
     if ( $use_index ) {
         local $Data::Dumper::Terse = 1;
-        my $data = Data::Dumper::Dumper( \%index );
+        my $data = Data::Dumper::Dumper( \%new );
 
         if ( ! -d $index_file->dir ) {
             $index_file->dir->mkpath;
@@ -1676,7 +1679,7 @@ sub index  {
         $fh->close;
     }
 
-    return %index;
+    return %new;
 }
 
 sub parse {
