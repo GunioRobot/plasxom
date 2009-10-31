@@ -814,6 +814,11 @@ sub get {
     return $self->{'cache'}->get( $key );
 }
 
+sub remove {
+    my ( $self, $key ) = @_;
+    return $self->{'cache'}->remove( $key );
+}
+
 1;
 
 package plasxom::cache::memory;
@@ -831,6 +836,11 @@ sub set {
 sub get {
     my ( $self, $key ) = @_;
     return $self->{$key};
+}
+
+sub remove {
+    my ( $self, $key ) = @_;
+    delete $self->{$key};
 }
 
 package plasxom::plugins;

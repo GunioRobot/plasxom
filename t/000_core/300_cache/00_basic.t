@@ -4,7 +4,7 @@ use strict;
 use warnings;
 
 use t::Util qw( require_plasxom );
-use Test::More tests => ( 1 + 2 ) + 2 + 2 + 1 + 2;
+use Test::More tests => ( 1 + 2 ) + 2 + 2 + 1 + 3;
 
 require_plasxom;
 
@@ -100,3 +100,7 @@ isa_ok( $cache->{'cache'}, 'plasxom::cache::memory' );
 $cache->set( foo => 'bar' );
 
 is( $cache->get('foo'), 'bar' );
+
+$cache->remove('foo');
+
+ok( ! exists $cache->{'cache'}->{'foo'} );
