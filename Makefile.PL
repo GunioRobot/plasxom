@@ -2,10 +2,10 @@
 
 use strict;
 use warnings;
-use inc::Modle::Install;
+use inc::Module::Install;
 
 name 'plasxom';
-all_from 'plasxom.pl';
+all_from 'plasxom.psgi';
 
 requires 'Path::Class';
 requires 'Carp';
