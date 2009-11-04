@@ -1,0 +1,8 @@
+package plasxom::plugin::foo;
+
+use strict;
+use warnings;
+
+use base qw( plasxom::plugin );
+
+1;
