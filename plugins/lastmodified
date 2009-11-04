@@ -1,0 +1,138 @@
+package plasxom::plugin::lastmodified;
+
+use strict;
+use warnings;
+
+use File::Find;
+use File::stat ();
+
+use base qw( plasxom::plugin );
+
+sub start {
+    my ( $self, $app ) = @_;
+    my $req = $app->req;
+
+    return 0 if ( $req->param );
+    return 0 if ( $req->method ne 'GET' );
+
+    return 1;
+}
+
+sub entries {
+    my ( $self, $app, $entries ) = @_;
+    my $config  = $self->config;
+    my $flavour = $app->flavour;
+
+    my @mtimes = ();
+
+    # entries
+    for my $entry ( @{ $entries } ) {
+        push @mtimes, ( $entry->lastmod || 0 );
+    }
+
+    # check_dirs, check_files
+    push @mtimes, $self->find_files;
+
+    # check_flavours;
+    if ( exists $config->{'check_flavours'} ) {
+        my @names = ( @{ $config->{'check_flavours'} }, qw( content_type template ) );
+           @names = do { my %t = (); grep { ! $t{$_}++ } @names };
+
+        for my $chunk ( @names ) {
+            push @mtimes, $app->templates->dispatch( $flavour->path_info, $chunk, $flavour->flavour )->lastmod;
+        }
+    }
+
+    $self->{'mtime'} = ( sort { $b <=> $a } @mtimes )[0];
+}
+
+sub skip {
+    my ( $self, $app ) = @_;
+    my $mtime   = $self->{'mtime'};
+    my $req     = $app->req;
+    my $res     = $app->res;
+
+    if ( defined $mtime && $mtime =~ m{^\d+$} ) {
+        $res->headers->last_modified( $mtime );
+
+        if ( my $since = $req->headers->if_modified_since ) {
+            if ( $mtime <= $since ) {
+                $res->status(304);
+                return 1;
+            }
+        }
+
+        if ( !! $self->config->{'use_cache'} ) {
+            if ( my $cache = $app->cache->get('plasxom-output-cache:' . $app->flavour->path_info) ) {
+                if ( $cache->{'mtime'} >= $mtime ) {
+                    $res->content_type( $cache->{'content_type'} );
+                    $res->body( $cache->{'body'} );
+                    return 1;
+                }
+            }
+        
+        }
+
+    }
+
+    return 0;
+}
+
+sub output {
+    my ( $self, $app, $ctt_ref, $body_ref ) = @_;
+    return if ( ! $self->config->{'use_cache'} );
+
+    my $cache = {
+        mtime           => time,
+        content_type    => ${ $ctt_ref },
+        body            => ${ $body_ref },
+    };
+
+    $app->cache->set( 'plasxom-output-cache:' . $app->flavour->path_info => $cache );
+
+    return 1;
+}
+
+sub find_files {
+    my ( $self ) = @_;
+    my $config = $self->config;
+
+    my @files = ();
+
+    # check_dirs
+    if ( exists $config->{'check_dirs'} ) {
+        for my $conf ( @{ $config->{'check_dirs'} } ) {
+            $conf = { path => $conf } if ( ! ref $conf );
+            my ( $path, $ignore ) = @{ $conf }{qw( path ignore )};
+
+            File::Find::find(
+                sub {
+                    my $file = $File::Find::name;
+
+                    return if ( -d $file );
+                    return if ( ! -e $file );
+                    return if ( defined $ignore && $file !~ $ignore );
+
+                    push @files, $file;
+                },
+                "$path",
+            );
+        }
+    }
+
+    # check_files
+    if ( exists $config->{'check_files'} ) {
+        push @files, @{ $config->{'check_files'} };
+    }
+
+    # load mtime;
+    my @mtimes = ();
+    for my $file ( @files ) {
+        my $stat = File::stat::stat($file);
+        push @mtimes, $stat->mtime if ( !! $stat );
+    }
+
+    return @mtimes;
+}
+
+1;
