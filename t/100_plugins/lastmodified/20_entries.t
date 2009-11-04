@@ -37,14 +37,26 @@ my $plugin = plasxom::plugin::lastmodified->new(
     state  => $example->subdir('plugin/lastmodified/state'),
 );
 
+local $ENV{'PLASXOM_CONFIG'} = $example->file('plugin/lastmodified/config.pl')->absolute->cleanup->stringify;
+
+plasxom->setup_config;
+plasxom->config->merge(
+    template => {
+        renderer    => {},
+        source      => { root_dir => $example->subdir('plugin/lastmodified/template') },
+    },
+    plugin  => {
+        plugin_dir          => $example->subdir('plugin/lastmodified/plugins'),
+        plugin_state_dir    => $example->subdir('plugin/lastmodified/state'),
+    },
+    plugins => [
+        { plugin => 'foo' },
+    ],
+);
+plasxom->setup_plugins;
+plasxom->setup_templates;
+
 my $app = plasxom->new;
-   $app->config->merge(
-        template => {
-            renderer    => {},
-            source      => { root_dir => $example->subdir('plugin/lastmodified/template') },
-        },
-   );
-   $app->setup_templates;
    $app->flavour( 'plasxom::flavour'->new( path_info => '/foo/bar', flavour => 'html' ) );
 
 my @mtimes = (
@@ -53,6 +65,8 @@ my @mtimes = (
     $app->templates->dispatch('/foo/bar', 'content_type', 'html')->lastmod,
     $app->templates->dispatch('/foo/bar', 'template', 'html')->lastmod,
     $app->templates->dispatch('/foo/bar', 'AAA', 'html')->lastmod,
+    $example->subdir('plugin/lastmodified/plugins')->file('foo')->stat->mtime,
+    $example->file('plugin/lastmodified/config.pl')->stat->mtime,
     $time,
 );
 

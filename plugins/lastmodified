@@ -30,8 +30,8 @@ sub entries {
         push @mtimes, ( $entry->lastmod || 0 );
     }
 
-    # check_dirs, check_files
-    push @mtimes, $self->find_files;
+    # check_dirs, check_files, plugins, configuration file
+    push @mtimes, $self->find_files( $app );
 
     # check_flavours;
     if ( exists $config->{'check_flavours'} ) {
@@ -94,7 +94,7 @@ sub output {
 }
 
 sub find_files {
-    my ( $self ) = @_;
+    my ( $self, $app ) = @_;
     my $config = $self->config;
 
     my @files = ();
@@ -124,6 +124,20 @@ sub find_files {
     if ( exists $config->{'check_files'} ) {
         push @files, @{ $config->{'check_files'} };
     }
+
+    # check plugins
+    for my $conf ( @{ $app->config->{'plugins'} || [] } ) {
+        my $plugin = $conf->{'plugin'};
+        for my $dir ( @{ $app->plugins->search_dirs } ) {
+            my $file = $dir->file($plugin);
+            if ( -e $file ) {
+                push @files, $file->stringify;
+            }
+        }
+    }
+
+    # check configuration file;
+    push @files, plasxom::util::env_value('config');
 
     # load mtime;
     my @mtimes = ();
