@@ -31,7 +31,6 @@ test_requires 'HTTP::Request';
 test_requires 'HTTP::Request::AsCGI';
 test_requires 'Test::Warn';
 test_requires 'Plack::Request';
-test_requires 'Test::Requires';
 
 tests 't/*/*/*.t';
 
