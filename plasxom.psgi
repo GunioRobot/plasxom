@@ -2073,10 +2073,14 @@ sub reload {
 
 sub commit {
     my ( $self ) = @_;
-    return $self->db->create_or_update(
-        path => $self->fullpath,
-        %{ $self->{'property'} },
-    );
+
+    my $path = $self->fullpath;
+    if ( defined( my $ret = $self->db->create_or_update( path => $path, %{ $self->{'property'} } ) ) ) {
+        my $stat = $self->db->stat( path => $path );
+        $self->lastmod( $stat->{'lastmod'} ) if ( exists $stat->{'lastmod'} );
+        return $ret;
+    }
+    return;
 }
 
 sub is_modified_source {

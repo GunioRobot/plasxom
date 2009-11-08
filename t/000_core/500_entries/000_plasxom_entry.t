@@ -32,7 +32,7 @@ plan tests =>
     + 1                                         # database
     + 2 + 2 + (scalar(@props) * 5) + ( 2 * 6 )  # property test
     + 5 + ( (scalar(@props) + 2) * 2)           # clear test
-    + 2 + 1                                     # commit test
+    + 2 + 1 + 1                                 # commit test
     + 1                                         # remove test
     + 2 + 2 + ( scalar(@props) * 2 )            # reload test
     + 6                                         # is_modified_source test
@@ -171,7 +171,10 @@ for my $prop ( @props, qw( body summary ) ) {
 $entry->clear_all;
 $entry->load;
 
+$stat = { lastmod => 2 };
 $entry->commit;
+is( $entry->lastmod, 2 );
+$entry->lastmod( $entry{'lastmod'} );
 
 # remove test
 $entry->remove;
