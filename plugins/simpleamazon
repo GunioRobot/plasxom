@@ -1,0 +1,187 @@
+package plasxom::plugin::simpleamazon;
+
+use strict;
+use warnings;
+
+use URI::Amazon::APA;
+use LWP::UserAgent;
+
+use base qw( plasxom::plugin );
+
+our %base = ();
+for my $locale (qw( ca de fr jp uk us )) {
+    $base{$locale} = "http://ecs.amazonaws.${locale}/onca/xml";
+}
+
+sub init {
+    my ( $self ) = @_;
+
+    my $locale = $self->config->{'locale'} or Carp::croak "APAAPI locale is not set.";
+    Carp::croak "Unknown APAAPI locale: ${locale}" if ( ! exists $base{$locale} );
+
+    $self->{'locale'} = $locale;
+
+    my $apikey = $self->config->{'apikey'} or Carp::croak "APAAPI APIkey is not set.";
+    $self->{'apikey'} = $apikey;
+
+    my $secret = $self->config->{'secret'} or Carp::croak "APAAPI Secret key is not set.";
+    $self->{'secret'} = $secret;
+
+    return 1;
+}
+
+sub setup {
+    my ( $self, $app ) = @_;
+
+    # get cache
+    $self->{'cache'} = $app->cache;
+
+    # register api
+    $app->api->register(
+        $self,
+        'simpleamazon.asin' => $self->can('asin'),
+    );
+
+    return 1;
+}
+
+sub asin {
+    my ( $self, $asin ) = @_;
+
+    my $cache = $self->{'cache'};
+
+    if ( ref( my $data = $cache->get("plasxom-simpleamazon-asin:${asin}") ) eq 'HASH' ) {
+        my $lastmod = $data->{'lastmod'};
+        my $time    = time;
+        if ( $time - $lastmod <= 60 * 60 * 24 ) {
+            return $data->{'cache'};
+        }
+    }
+
+    my $locale = $self->{'locale'};
+    my $apikey = $self->{'apikey'};
+    my $secret = $self->{'secret'};
+
+    # gen Timestamp
+    my ( $sec, $min, $hr, $da, $mo, $yr ) = gmtime();
+    $yr += 1900;
+    $mo++;
+    my $time = sprintf("%04d-%02d-%02dT%02d:%02d:%02dZ", $yr, $mo, $da, $hr, $min, $sec);
+
+    my %param = (
+        Service         => 'AWSECommerceService',
+        AWSAccessKeyId  => $apikey,
+        Operation       => 'ItemLookup',
+        ItemId          => $asin,
+        ResponseGroup   => 'Medium,Offers',
+        Version         => '2009-02-01',
+        Timestamp       => $time,
+    );
+
+    my $uri = URI::Amazon::APA->new( $base{$locale} );
+       $uri->query_form( %param );
+       $uri->sign( key => $apikey, secret => $secret );
+
+    while ( 1 ) {
+        my $time    = time;
+        my $lastreq = $cache->get('plasxom-simpleamazon-last-request');
+
+        if ( ! $lastreq || $time - $lastreq > 1 ) {
+            my $ua = LWP::UserAgent->new;
+               $ua->agent('plasxom-plugin-simpleamazon');
+               $ua->timeout( $self->config->{'timeout'} || 10 );
+            my $res = $ua->get( $uri );
+            if ( $res->is_success ) {
+                my $ret = $self->parse( $res->content );
+                $cache->set('plasxom-simpleamazon-last-request' => $time);
+                $cache->set("plasxom-simpleamazon-asin:${asin}" => { lastmod => $time, cache => $ret }) if ( ! exists $ret->{'error'} );
+                return $ret;
+            }
+            else {
+                return { error => $res->status_line };
+            }
+        }
+        else {
+            sleep(1);
+        }
+    }
+}
+
+sub parse {
+    my ( $self, $xml ) = @_;
+
+    my $data    = {};
+    my %regexp  = (
+        ASIN            => qr{<ASIN>(.*?)</ASIN>},
+
+        DetailPageURL   => qr{<DetailPageURL>(.*?)</DetailPageURL>},
+
+        AddToWishlist       => qr{<Description>Add To Wishlist</Description><URL>(.+?)</URL>},
+        TellAFriend         => qr{<Description>Tell A Friend</Description><URL>(.+?)</URL>},
+        AllCustomerReviews  => qr{<Description>All Customer Reviews</Description><URL>(.+?)</URL>},
+        AllOffers           => qr{<Description>All Offers</Description><URL>(.+?)</URL>},
+
+        SwatchImage         => qr{<ImageSet Category="primary">.*?<SwatchImage><URL>(.+?)</URL>},
+        SmallImage          => qr{<ImageSet Category="primary">.*?<SmallImage><URL>(.+?)</URL>},
+        ThumbnailImage      => qr{<ImageSet Category="primary">.*?<ThumbnailImage><URL>(.+?)</URL>},
+        TinyImage           => qr{<ImageSet Category="primary">.*?<TinyImage><URL>(.+?)</URL>},
+        MediumImage         => qr{<ImageSet Category="primary">.*?<MediumImage><URL>(.+?)</URL>},
+        LargeImage          => qr{<ImageSet Category="primary">.*?<LargeImage><URL>(.+?)</URL>},
+
+        Author              => qr{<Author>(.+?)</Author>},
+        Binding             => qr{<Binding>(.+?)</Binding>},
+        ListPrice           => qr{<ListPrice><Amount>(.+?)</Amount>},
+        Manufacturer        => qr{<Manufacturer>(.+?)</Manufacturer>},
+        ReleaseDate         => qr{<PublicationDate>(.+?)</PublicationDate>|<ReleaseDate>(.+?)</ReleaseDate>},
+        Title               => qr{<Title>(.+?)</Title>},
+
+        LowestUsedPrice     => qr{<LowestUsedPrice><Amount>(.+?)</Amount>},
+        Availability        => qr{<Availability>(.+?)</Availability>},
+    );
+
+    if ( $xml =~ m{<Errors>.*?<Message>([^<]*)<\/Message>} ) {
+        $data->{'error'} = $1;
+    }
+    else {
+        for my $key ( sort keys %regexp ) {
+            if ( $xml =~ $regexp{$key} ) {
+                $data->{$key} = $1;
+            }
+        }
+    }
+
+    return $data;
+}
+
+sub entries {
+    my ( $self, $app, $entries ) = @_;
+
+    my $use_meta    = !! $self->config->{'use_meta'};
+    my $key         = $self->config->{'meta_key'} || 'replace_asin';
+    my $default     = $self->config->{'default_flavour'} || 'asin';
+
+    my $templates   = $app->templates;
+    my $flavour     = $app->flavour;
+
+    if ( !! $self->config->{'replace_asin'} ) {
+        for my $entry ( @{ $entries } ) {
+            if ( ! $use_meta || !! $entry->meta->{$key} ) {
+                for my $source ( qw( body summary ) ) {
+                    my $target  = "${source}_source";
+                    my $text    = $entry->$target;
+                    $target =~ s{ASIN:(\d{10}):(?:([a-zA-Z0-9\-_.]+$):)?}{
+                        my $asin = $1;
+                        my $spec = $2 || $default;
+
+                        my $data = $self->asin($asin);
+                        my $tmpl = $templates->dispatch( $flavour->path_info, $spec, $flavour->flavour );
+
+                        $tmpl->render( $app, $data );
+                    }ige;
+                }
+            }
+        }
+    }
+}
+
+1;

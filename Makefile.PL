@@ -19,7 +19,12 @@ requires 'Plack::Request';
 
 feature 'lastmodified plugin test required'
     => -default => 1
-    => recommands('IO::Stirng')
+    => 'IO::String'
+    ;
+
+feature 'simpleamazon plugin required'
+    => -default => 1,
+    => 'URI::Amazon::APA'
     ;
 
 test_requires 'Test::More';
@@ -35,5 +40,6 @@ test_requires 'Plack::Request';
 tests 't/*/*/*.t';
 
 auto_include;
+auto_install;
 
 WriteAll;
