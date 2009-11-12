@@ -137,6 +137,8 @@ sub parse {
 
         LowestUsedPrice     => qr{<LowestUsedPrice><Amount>(.+?)</Amount>},
         Availability        => qr{<Availability>(.+?)</Availability>},
+
+        Timestamp           => qr{Name="Timestamp" Value="(.*?)"},
     );
 
     if ( $xml =~ m{<Errors>.*?<Message>([^<]*)<\/Message>} ) {

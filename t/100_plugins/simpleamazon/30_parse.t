@@ -43,5 +43,6 @@ is_deeply(
         LowestUsedPrice     => '1000',
         Availability        => '在庫あり。',
 
+        Timestamp           => '2009-11-12T05:48:29Z',
     }
 );
