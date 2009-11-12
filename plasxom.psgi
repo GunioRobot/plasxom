@@ -1201,6 +1201,7 @@ sub filter {
     # filter path
     $path =~ s{/+}{/}g;
     $path =~ s{^/*}{};
+    $path = quotemeta($path);
 
     for my $entry ( @{ $index } ) {
         my $fn = $entry->fullpath;
