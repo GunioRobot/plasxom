@@ -2273,6 +2273,8 @@ sub dispatch {
     my $path_info   = $req->path_info || q{};
     my $uri         = $req->uri;
 
+    $path_info      =~ s{%([0-9A-Fa-f][0-9A-Fa-f])}{pack('H2', $1)}eg;
+
     # url
     my $url = q{};
        $url .= $req->env->{'psgi.url_scheme'} || 'http';
