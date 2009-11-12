@@ -163,13 +163,14 @@ sub entries {
     my $templates   = $app->templates;
     my $flavour     = $app->flavour;
 
+
     if ( !! $self->config->{'replace_asin'} ) {
         for my $entry ( @{ $entries } ) {
             if ( ! $use_meta || !! $entry->meta->{$key} ) {
                 for my $source ( qw( body summary ) ) {
                     my $target  = "${source}_source";
-                    my $text    = $entry->$target;
-                    $target =~ s{ASIN:(\d{10}):(?:([a-zA-Z0-9\-_.]+$):)?}{
+                    my $text    = $entry->$target();
+                    $text =~ s{ASIN:(\d{10})(?:[:](.*?)[:])?}{
                         my $asin = $1;
                         my $spec = $2 || $default;
 
@@ -178,6 +179,7 @@ sub entries {
 
                         $tmpl->render( $app, $data );
                     }ige;
+                    $entry->$target( $text );
                 }
             }
         }
