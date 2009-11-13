@@ -172,7 +172,7 @@ sub entries {
                 for my $source ( qw( body summary ) ) {
                     my $target  = "${source}_source";
                     my $text    = $entry->$target();
-                    $text =~ s{ASIN:(\d{10})(?:[:](.*?)[:])?}{
+                    $text =~ s{ASIN:([0-9A-Z]{10})(?:[:](.*?)[:])?}{
                         my $asin = $1;
                         my $spec = $2 || $default;
 
