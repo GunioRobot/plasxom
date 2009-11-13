@@ -38,6 +38,7 @@ is_deeply(
         ListPrice           => '1365',
         Manufacturer        => '講談社',
         ReleaseDate         => '2008-05-08',
+        PublicationDate     => '2008-05-08',
         Title               => '傷物語 (講談社BOX)',
 
         LowestUsedPrice     => '1000',

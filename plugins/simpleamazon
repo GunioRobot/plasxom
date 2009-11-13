@@ -132,7 +132,8 @@ sub parse {
         Binding             => qr{<Binding>(.+?)</Binding>},
         ListPrice           => qr{<ListPrice><Amount>(.+?)</Amount>},
         Manufacturer        => qr{<Manufacturer>(.+?)</Manufacturer>},
-        ReleaseDate         => qr{<PublicationDate>(.+?)</PublicationDate>|<ReleaseDate>(.+?)</ReleaseDate>},
+        PublicationDate     => qr{<PublicationDate>(.+?)</PublicationDate>},
+        ReleaseDate         => qr{<ReleaseDate>(.+?)</ReleaseDate>},
         Title               => qr{<Title>(.+?)</Title>},
 
         LowestUsedPrice     => qr{<LowestUsedPrice><Amount>(.+?)</Amount>},
@@ -149,6 +150,13 @@ sub parse {
             if ( $xml =~ $regexp{$key} ) {
                 $data->{$key} = $1;
             }
+        }
+
+        if ( exists $data->{'PublicationDate'} && ! exists $data->{'ReleaseDate'} ) {
+            $data->{'ReleaseDate'} = $data->{'PublicationDate'};
+        }
+        elsif ( exists $data->{'ReleaseDate'} && ! exists $data->{'PublicationDate'} ) {
+            $data->{'PublicationDate'} = $data->{'ReleaseDate'};
         }
     }
 
