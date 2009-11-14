@@ -909,20 +909,18 @@ sub setup {
     my $plugins = $self->plugins;
 
     PLUGIN: for my $order ( @{ $self->order } ) {
-        my $module = $order->{'plugin'};
-        my $config = $order->{'config'};
+        my ( $module, $config ) = @{ $order }{qw( plugin config )};
 
         my $package = $module;
-           $package =~ s{^plasxom::plugin}{};
-           $package = "plasxom::plugin::${package}";
+           $package = "plasxom::plugin::${package}" if ( $package !~ m{^plasxom::plugin} );
 
         for my $dir ( @{ $self->search_dirs } ) {
-            my $path = $dir->file($module);
+            my $path = "${dir}/${module}";
 
             if ( -e $path && -r _ ) {
                 eval { require $path };
 
-                Carp::croak "Failed to load plugin: $package: $path: $@" if ( $@ );
+                Carp::croak "Failed to load plugin: ${package}: ${path}: ${@}" if ( $@ );
                 for my $method ( qw( new setup start ) ) {
                     Carp::croak "${package}->${method} is not implemented."
                         if ( ! $package->can($method) );
@@ -1492,13 +1490,13 @@ sub init {
     $self->{'config'}->{'readonly'} = $readonly;
 }
 
-for my $prop (qw( entries_dir file_extension depth use_cache use_index auto_update readonly ))  {
-    no strict 'refs';
-    *{$prop} = sub {
-        my ( $self ) = @_;
-        return $self->{'config'}->{$prop};
-    };
-}
+sub entries_dir     { $_[0]->{'config'}->{'entries_dir'}    }
+sub file_extension  { $_[0]->{'config'}->{'file_extension'} }
+sub depth           { $_[0]->{'config'}->{'depth'}          }
+sub use_cache       { $_[0]->{'config'}->{'use_cache'}      }
+sub use_index       { $_[0]->{'config'}->{'use_index'}      }
+sub auto_update     { $_[0]->{'config'}->{'auto_update'}    }
+sub readonly        { $_[0]->{'config'}->{'readonly'}       }
 
 sub entry_path {
     my ( $self, $path ) = @_;
@@ -1662,9 +1660,7 @@ sub index  {
         sub {
             my $file = $File::Find::name;
 
-            return if ( -d $file );
-            return if ( ! -r $file );
-            return if ( $file !~ m{\.$fe$} );
+            return if ( -d $file || ! -r $file || $file !~ m{\.$fe$} );
 
             my $path = $file;
                $path =~ s{^$root/}{};
@@ -1833,10 +1829,15 @@ our @num2month = sort { $month2num{$a} <=> $month2num{$b} } keys %month2num;
 our @fullmonth = qw( nil January February March April May June July
                      August September October November December );
 
+my %cache;
+
 sub new {
     my ( $class, %args ) = @_;
-
     my $epoch = delete $args{'epoch'} or Carp::croak "Argument 'epoch' is not specified.";
+
+    if ( exists $cache{$epoch} ) {
+        return $cache{$epoch};
+    }
 
     my $ctime = Time::localtime::ctime($epoch);
     my ( $dw, $mo, $da, $hr, $min, $sec, $yr )
@@ -1857,13 +1858,20 @@ sub new {
         dayweek     => $dw,
     }, $class;
 
+    $cache{$epoch} = $self;
     return $self;
 }
 
-for my $prop (qw( epoch year month shortmonth fullmonth day hour minute second dayweek )) {
-    no strict 'refs';
-    *{$prop} = sub { return $_[0]->{$prop} };
-}
+sub epoch       { $_[0]->{'epoch'}      }
+sub year        { $_[0]->{'year'}       }
+sub month       { $_[0]->{'month'}      }
+sub shortmonth  { $_[0]->{'shortmonth'} }
+sub fullmonth   { $_[0]->{'fullmonth'}  }
+sub day         { $_[0]->{'day'}        }
+sub hour        { $_[0]->{'hour'}       }
+sub minute      { $_[0]->{'minute'}     }
+sub second      { $_[0]->{'second'}     }
+sub dayweek     { $_[0]->{'dayweek'}    }
 
 sub ymd {
     my ( $self ) = @_;
@@ -1905,6 +1913,7 @@ sub new {
         path        => {
             path            => $path,
             filename        => $fn,
+            fullpath        => $fullpath,
         },
         property    => { %args },
         stash       => { %{ $stash } },
@@ -2004,17 +2013,16 @@ sub clear_formatter {
 
 sub formatter { $_[0]->{'formatter'} };
 
-for my $flag (qw( loaded )) {
-    no strict 'refs';
-    *{$flag} = sub {
-        my $self = shift;
-        if ( @_ ) {
-            $self->{'flag'}->{$flag} = shift;
-        }
-        else {
-            return $self->{'flag'}->{$flag};
-        }
-    };
+sub loaded {
+    my $self = shift;
+
+    if ( @_ ) {
+        $self->{'flag'}->{'loaded'} = shift @_;
+    }
+    else {
+        return $self->{'flag'}->{'loaded'};
+    }
+
 }
 
 sub stash { $_[0]->{'stash'} }
@@ -2024,26 +2032,10 @@ sub date {
     return plasxom::date->new( epoch => $self->created, );
 }
 
-for my $prop (qw( path filename )) {
-    no strict 'refs';
-    *{$prop} = sub {
-        my ( $self ) = @_;
-        return $self->{'path'}->{$prop};
-    }
-}
-
-sub db { $_[0]->{'db'} }
-
-sub fullpath {
-    my ( $self ) = @_;
-
-    my $path    = $self->path;
-    my $fn      = $self->filename;
-
-       $path    &&= "${path}/";
-
-    return "${path}${fn}";
-}
+sub path        { $_[0]->{'path'}->{'path'}     }
+sub filename    { $_[0]->{'path'}->{'filename'} }
+sub fullpath    { $_[0]->{'path'}->{'fullpath'} }
+sub db          { $_[0]->{'db'} }
 
 sub load {
     my ( $self, %args ) = @_;
