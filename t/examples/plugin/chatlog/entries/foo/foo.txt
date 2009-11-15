@@ -1,0 +1,9 @@
+title
+@type: log
+foo: AAA
+bar: BBB
+baz: CCC
+---
+foo: AAA
+bar: BBB
+baz: CCC

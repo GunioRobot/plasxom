@@ -1,0 +1,6 @@
+? my ( $app, $lines ) = @_;
+? for my $line ( @{ $lines } ) {
+? my ( $label, $label_id, $data, $count, $odd_even ) = @{ $line }{qw( label label_id line count odd_even )};
+? $label ||= q{}; $label_id ||= q{};
+<?= "${label}:${label_id}:${count}:${odd_even}:${data}" ?>
+? }

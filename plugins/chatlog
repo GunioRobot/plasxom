@@ -1,0 +1,86 @@
+package plasxom::plugin::chatlog;
+
+use strict;
+use warnings;
+
+use base qw( plasxom::plugin );
+
+sub update {
+    my ( $self, $app, $entries ) = @_;
+
+    for my $entry ( @{ $entries->index } ) {
+        $entry->register_formatter( $self, qw( format handle ) );
+    }
+
+    $self->{'app'} = $app;
+
+    return 1;
+}
+
+sub handle {
+    my ( $self, $entry, $type ) = @_;
+    return if ( $type eq 'summary' );
+
+    my $meta_key    = $self->config->{'meta_key'}   || 'type';
+    my $meta_value  = $self->config->{'meta_value'} || 'chat';
+
+    if ( exists $entry->meta->{$meta_key} && $entry->meta->{$meta_key} eq $meta_value ) {
+        return 1;
+    }
+
+    return;
+}
+
+sub format {
+    my ( $self, $entry, $type ) = @_;
+    return $entry->summary_source if ( $type eq 'summary' );
+
+    my $source      = $entry->body_source;
+    my $separator   = $self->config->{'separator'} || qr{\s*[:]\s*};
+
+    $source =~ s{\x0D\x0A}{\n}g;
+    $source =~ tr{\x0D\x0A}{\n\n};
+    $source =~ s{^\n*}{};
+    $source =~ s{\n*$}{}g;
+
+    my @labels  = ();
+    my @lines   = ();
+    my $count   = 0;
+
+    for my $line ( split m{\n+}, $source ) {
+        my %data = ();
+        $count++;
+        if ( $line =~ m{^(.+?)$separator(.+)$} ) {
+            @data{qw( label line )} = ( $1, $2 );
+            push @labels, $data{'label'};
+        }
+        else {
+            $data{'line'} = $line;
+        }
+
+        $data{'count'}      = $count;
+        $data{'odd_even'}   = ( $count % 2 == 0 ) ? 'even' : 'odd' ;
+
+        push @lines, +{ %data };
+    }
+
+    @labels = do { my %t; grep { ! $t{$_}++ } @labels };
+    my %label2num   = ();
+    my $label_num   = 0;
+    for my $label ( @labels ) {
+        $label_num++;
+        $label2num{ $label } = $label_num;
+    }
+
+    for my $line ( @lines ) {
+        if ( exists $line->{'label'} ) {
+            my $label = $line->{'label'};
+            $line->{'label_id'} = $label2num{$label};
+        }
+    }
+
+    my $app = $self->{'app'};
+    return $app->templates->dispatch( $entry->path, 'chatlog', $app->flavour->flavour )->render( $app, [ @lines ] );
+}
+
+1;
