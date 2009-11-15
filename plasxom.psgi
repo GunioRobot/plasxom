@@ -1920,7 +1920,7 @@ sub new {
             loaded => 0,
         },
         db          => $db,
-        formatter   => {},
+        formatter   => [],
     }, $class;
 
 }
@@ -1955,13 +1955,16 @@ for my $prop ( qw( body summary ) ) {
             }
 
             if ( ! exists $self->{'property'}->{$prop} ) {
-                my $source = "${prop}_source";
-                my $body    = $self->$source;
-                my $stash   = $self->formatter;
+                my $source      = "${prop}_source";
+                my $body        = $self->$source;
+                my $formatters  = $self->formatter || [];
 
-                if ( exists $stash->{'formatter'} && exists $stash->{'method'} ) {
-                    my ( $formatter, $method ) = @{ $stash }{qw( formatter method )};
-                    $body = $formatter->$method( $self, $prop );
+                FORMAT: for my $stash ( @{ $formatters } ) {
+                    my ( $instance, $method, $handle ) = @{ $stash }{qw( formatter method handle )};
+                    if ( $instance->$handle( $self, $prop ) ) {
+                        $body = $instance->$method( $self, $prop );
+                        last FORMAT;
+                    }
                 }
 
                 $self->{'property'}->{$prop} = $body
@@ -1986,28 +1989,31 @@ sub clear_all {
 
     $self->{'property'}  = {};
     $self->{'flag'}      = { loaded => 0 };
-    $self->{'formatter'} = {};
+    $self->{'formatter'} = [];
     $self->{'stash'}     = {};
 
     return 1;
 }
 
 sub register_formatter {
-    my ( $self, $formatter, $method ) = @_;
+    my ( $self, $formatter, $method, $handle ) = @_;
 
     Carp::croak "formatter is not specified." if ( ! defined $formatter );
     Carp::croak "formatter method is not specified." if ( ! defined $method );
+    Carp::croak "formatter handler is not specified." if ( ! defined $handle );
 
-    $self->{'formatter'} = {
+    $self->{'formatter'} ||= [];
+    push @{ $self->{'formatter'} }, +{
         formatter   => $formatter,
         method      => $method,
+        handle      => $handle,
     };
 }
 
 sub clear_formatter {
     my ( $self ) = @_;
 
-    $self->{'formatter'} = {};
+    $self->{'formatter'} = [];
 }
 
 sub formatter { $_[0]->{'formatter'} };

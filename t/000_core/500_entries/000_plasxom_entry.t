@@ -30,7 +30,7 @@ plan tests =>
     + 1                                         # default stash
     + 1                                         # default flag
     + 1                                         # database
-    + 2 + 2 + (scalar(@props) * 5) + ( 2 * 6 )  # property test
+    + 2 + 2 + (scalar(@props) * 5) + ( 2 * 7 )  # property test
     + 5 + ( (scalar(@props) + 2) * 2)           # clear test
     + 2 + 1 + 1                                 # commit test
     + 1                                         # remove test
@@ -84,7 +84,17 @@ plan tests =>
     1;
 
     package TestFormatter;
-    
+
+    sub handle {
+        our ( $class, $entry ) = @_;
+
+        package main;
+        
+        isa_ok( $TestFormatter::entry, 'plasxom::entry' );
+
+        return 1;
+    }
+
     sub format {
         our ( $class, $entry ) = @_;
         package main;
@@ -144,7 +154,7 @@ for my $prop (qw( body summary )) {
 
     # formatter test
     delete $entry->{'property'}->{$prop};
-    $entry->register_formatter('TestFormatter' => 'format');
+    $entry->register_formatter( 'TestFormatter', qw( format handle ) );
 
     is( $entry->$prop, 'foobarbaz' );
 
@@ -157,7 +167,7 @@ $entry->clear_all;
 
 is_deeply( $entry->{'property'},    {} );
 is_deeply( $entry->{'flag'},        { loaded => 0 } );
-is_deeply( $entry->{'formatter'},   {} );
+is_deeply( $entry->{'formatter'},   [] );
 
 $entry->load;
 
