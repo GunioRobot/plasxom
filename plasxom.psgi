@@ -265,7 +265,7 @@ sub prepare_entries {
 
     # reload index
     for my $entry ( @{ $entries->index } ) {
-        if ( ! $entries->exists( path => $entry->fullpath ) ) {
+        if ( ! $entries->exists( path => $entry->{'path'}->{'fullpath'} ) ) {
             $entries->reindex;
         }
     }
@@ -1111,7 +1111,7 @@ sub index {
         push @index, $entry;
     }
 
-    @index = sort { $a->fullpath cmp $b->fullpath } @index;
+    @index = sort { $a->{'path'}->{'fullpath'} cmp $b->{'path'}->{'fullpath'} } @index;
 
     $self->{'index'} = \@index;
     $self->indexed(1);
@@ -1137,7 +1137,7 @@ sub entry {
     my ( $self, %args ) = @_;
     my $path = delete $args{'path'} or Carp::croak "Argument 'path' is not specified.";
 
-    if ( $self->exists( path => $path ) && ref( my $entry = ( grep { $_->fullpath eq $path } @{ $self->index } )[0] ) eq 'plasxom::entry' ) {
+    if ( $self->exists( path => $path ) && ref( my $entry = ( grep { $_->{'path'}->{'fullpath'} eq $path } @{ $self->index } )[0] ) eq 'plasxom::entry' ) {
         return $entry;
     }
     else {
@@ -1205,7 +1205,7 @@ sub filter {
     $path = quotemeta($path);
 
     for my $entry ( @{ $index } ) {
-        my $fn = $entry->fullpath;
+        my $fn = $entry->{'path'}->{'fullpath'};
         if ( $fn =~ m{^$path} ) {
             $new{$fn} = $entry;
         }
@@ -1493,12 +1493,20 @@ sub use_index       { $_[0]->{'config'}->{'use_index'}      }
 sub auto_update     { $_[0]->{'config'}->{'auto_update'}    }
 sub readonly        { $_[0]->{'config'}->{'readonly'}       }
 
+my %path_cache = ();
 sub entry_path {
-    my ( $self, $path ) = @_;
+    my ( $self, $opath ) = @_;
 
+    if ( exists $path_cache{$opath} ) {
+        return $path_cache{$opath};
+    }
+
+    my $path = $opath;
     $path =~ s{/+}{/}g;
     $path =~ s{^/*}{};
     $path =~ s{/*$}{};
+
+    $path_cache{$opath} = $path;
 
     return $path;
 }
@@ -1609,9 +1617,10 @@ sub exists {
        $path = "${path}." . $self->file_extension;
 
     my $depth       = $self->depth;
+    my $entries_dir = $self->entries_dir;
     my $file_depth  = ( $path =~ tr{/}{} ) + 1;
 
-    if ( ( ! $depth || $depth && $file_depth <= $depth ) && -e $self->entries_dir->file($path) && -r _ ) {
+    if ( ( ! $depth || $depth && $file_depth <= $depth ) && -e "${entries_dir}/${path}" && -r _ ) {
         return 1;
     }
 
@@ -2030,7 +2039,7 @@ sub db          { $_[0]->{'db'} }
 sub load {
     my ( $self, %args ) = @_;
 
-    my $path = $self->fullpath;
+    my $path = $self->{'path'}->{'fullpath'};
     my $reload = ( !! $args{'reload'} ) ? 1 : 0 ;
 
     if ( $self->db->exists( path => $path ) ) {
@@ -2057,7 +2066,7 @@ sub reload {
 sub commit {
     my ( $self ) = @_;
 
-    my $path = $self->fullpath;
+    my $path = $self->{'path'}->{'fullpath'};
     if ( defined( my $ret = $self->db->create_or_update( path => $path, %{ $self->{'property'} } ) ) ) {
         my $stat = $self->db->stat( path => $path );
         $self->lastmod( $stat->{'lastmod'} ) if ( exists $stat->{'lastmod'} );
@@ -2069,9 +2078,9 @@ sub commit {
 sub is_modified_source {
     my ( $self ) = @_;
 
-    if ( $self->db->exists( path => $self->fullpath ) ) {
+    if ( $self->db->exists( path => $self->{'path'}->{'fullpath'} ) ) {
         my $lastmod = $self->lastmod;
-        my $stat    = $self->db->stat( path => $self->fullpath );
+        my $stat    = $self->db->stat( path => $self->{'path'}->{'fullpath'} );
         if ( ! exists $stat->{'lastmod'} || $stat->{'lastmod'} != $lastmod ) {
             return 1;
         }
@@ -2089,7 +2098,7 @@ sub is_modified_source {
 
 sub remove {
     my ( $self ) = @_;
-    return $self->db->remove( path => $self->fullpath );
+    return $self->db->remove( path => $self->{'path'}->{'fullpath'} );
 }
 
 1;
