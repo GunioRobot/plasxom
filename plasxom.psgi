@@ -3,13 +3,30 @@
 use strict;
 use warnings;
 
-package plasxom;
-
-use Text::MicroTemplate ();
-use Path::Class ();
+# global
 use Carp ();
+use Path::Class ();
+
+# template
+use Text::MicroTemplate ();
+
+# entries
+use File::Find ();
+use File::stat ();
+use Data::Dumper ();
+
+# date
+use Time::localtime ();
+use Time::Local ();
+
+# util
+use Time::Local ();
+
+# handler
 use Plack::Request;
 use Plack::Response;
+
+package plasxom;
 
 our $VERSION = '0.02';
 
@@ -414,8 +431,6 @@ sub merge {
 
 package plasxom::api;
 
-use Carp;
-
 sub new {
     my ( $class ) = @_;
     return bless { API => {} }, $class;
@@ -444,8 +459,6 @@ sub call {
 1;
 
 package plasxom::template;
-
-use Carp ();
 
 sub new {
     my ( $class, %args ) = @_;
@@ -624,8 +637,6 @@ sub dispatch {
 
 package plasxom::template::source;
 
-use Carp ();
-
 sub new {
     my ( $class, @args ) = @_;
     my $self = bless { config => {} }, $class;
@@ -646,8 +657,6 @@ for my $method (qw( init create update select remove exists stat )) {
 
 package plasxom::template::source::file;
 
-use Carp ();
-use Path::Class ();
 use base qw( plasxom::template::source );
 
 sub init {
@@ -769,8 +778,6 @@ sub render {
 
 package plasxom::template::renderer::microtemplate;
 
-use Text::MicroTemplate ();
-
 use base qw( plasxom::template::renderer );
 
 sub compile {
@@ -787,8 +794,6 @@ sub compile {
 1;
 
 package plasxom::cache;
-
-use Carp ();
 
 sub new {
     my ( $class, %args ) = @_;
@@ -859,9 +864,6 @@ sub remove {
 
 package plasxom::plugins;
 
-use Path::Class::Dir;
-use Carp ();
-
 sub new {
     my ( $class, %args ) = @_;
 
@@ -873,11 +875,14 @@ sub new {
 
     $dirs = [ $dirs ] if ( ref $dirs ne 'ARRAY' );
 
-    my $plugin_dirs = [ map { Path::Class::Dir->new($_) } @{ $dirs } ];
+    my @plugin_dirs = ();
+    for my $dir ( @{ $dirs } ) {
+        push @plugin_dirs, Path::Class::Dir->new( $dir );
+    }
     my $state_dir   = Path::Class::Dir->new($state);
 
     my $self = bless {
-        search_dirs => $plugin_dirs,
+        search_dirs => [ @plugin_dirs ],
         state_dir   => $state_dir,
         order       => $order,
         plugins     => [],
@@ -1025,8 +1030,6 @@ sub setup { 1 }
 sub start { 1 }
 
 package plasxom::entries;
-
-use Carp ();
 
 sub new {
     my ( $class, %args ) = @_;
@@ -1365,8 +1368,6 @@ sub total_page {
 
 package plasxom::entries::base;
 
-use Carp ();
-
 sub new {
     my ( $class, %args ) = @_;
     my $self = bless { config => {} }, $class;
@@ -1398,16 +1399,10 @@ sub create_or_update {
     }
 }
 
-
 1;
 
 package plasxom::entries::blosxom;
 
-use Carp ();
-use Path::Class ();
-use File::Find ();
-use File::stat ();
-use Data::Dumper ();
 use base qw( plasxom::entries::base );
 
 sub init {
@@ -1817,9 +1812,6 @@ sub build {
 
 package plasxom::date;
 
-use Carp ();
-use Time::localtime ();
-
 our %month2num = (  nil => '00', Jan => '01', Feb => '02', Mar => '03',
                     Apr => '04', May => '05', Jun => '06', Jul => '07',
                     Aug => '08', Sep => '09', Oct => '10', Nov => '11', Dec => '12' );
@@ -1888,8 +1880,6 @@ sub time {
 1;
 
 package plasxom::entry;
-
-use Carp ();
 
 sub new {
     my ( $class, %args ) = @_;
@@ -2105,8 +2095,6 @@ sub remove {
 1;
 
 package plasxom::flavour;
-
-use Carp ();
 
 sub new {
     my ( $class, %args ) = @_;
@@ -2344,10 +2332,6 @@ sub dispatch {
 }
 
 package plasxom::util;
-
-use Carp ();
-use Time::Local ();
-use Data::Dumper ();
 
 sub env_value {
     my ( $key ) = @_;
