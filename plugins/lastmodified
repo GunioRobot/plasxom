@@ -33,14 +33,12 @@ sub entries {
     # check_dirs, check_files, plugins, configuration file
     push @mtimes, $self->find_files( $app );
 
-    # check_flavours;
-    if ( exists $config->{'check_flavours'} ) {
-        my @names = ( @{ $config->{'check_flavours'} }, qw( content_type template ) );
-           @names = do { my %t = (); grep { ! $t{$_}++ } @names };
+    # check_flavours
+    my @names = ( @{ $config->{'check_flavours'} || [] }, qw( content_type template ) );
+       @names = do { my %t = (); grep { ! $t{$_}++ } @names };
 
-        for my $chunk ( @names ) {
-            push @mtimes, $app->templates->dispatch( $flavour->path_info, $chunk, $flavour->flavour )->lastmod;
-        }
+    for my $chunk ( @names ) {
+        push @mtimes, $app->templates->dispatch( $flavour->path_info, $chunk, $flavour->flavour )->lastmod;
     }
 
     $self->{'mtime'} = ( sort { $b <=> $a } @mtimes )[0];
