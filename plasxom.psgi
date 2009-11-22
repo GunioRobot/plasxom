@@ -1161,6 +1161,12 @@ sub reindex_all {
     return $self->all;
 }
 
+sub reindex {
+    my ( $self ) = @_;
+    $self->indexed(0);
+    return $self->index;
+}
+
 sub exists {
     my ( $self, %args ) = @_;
     my $path = delete $args{'path'} or Carp::croak "Argument 'path' is not specified.";
