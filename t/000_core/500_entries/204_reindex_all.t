@@ -4,7 +4,7 @@ use strict;
 use warnings;
 
 use t::Util qw( require_plasxom $example );
-use Test::More tests => 3;
+use Test::More tests => 2;
 use File::stat;
 
 require_plasxom;
@@ -19,11 +19,15 @@ my $entries = plasxom::entries->new(
     meta_prefix     => '@',
 );
 
+$entries->reindex_all;
+
+is( $entries->indexed_all, 1 );
+
 my $index = [
     plasxom::entry->new(
         db => $entries->db,
         path => 'foo',
-        title   => 'title',
+        title => 'title',
         pagename    => 'foopage',
         tags        => [qw( foo bar baz )],
         meta        => { foo => 'bar', bar => 'baz' },
@@ -33,7 +37,7 @@ my $index = [
     plasxom::entry->new(
         db => $entries->db,
         path => 'foo/bar',
-        title   => 'title',
+        title => 'title',
         pagename    => 'foopage',
         tags        => [qw( foo bar baz )],
         meta        => { foo => 'bar', bar => 'baz' },
@@ -43,13 +47,6 @@ my $index = [
 ];
 
 is_deeply(
-    $entries->index,
-    $index,
-);
-
-is( $entries->indexed, 1 );
-
-is_deeply(
-    $entries->index,
+    $entries->all,
     $index,
 );

@@ -30,11 +30,11 @@ is_deeply(
     TestEntries->new( foo => 'bar' ),
 );
 
-ok( ! $entries->indexed );
+ok( ! $entries->indexed_all );
 
-$entries->indexed(1);
+$entries->indexed_all(1);
 
-ok( $entries->indexed );
+ok( $entries->indexed_all );
 
 is( $entries->num_entries, 5 );
 

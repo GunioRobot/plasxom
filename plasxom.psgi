@@ -1037,6 +1037,8 @@ sub new {
 
     my $schema = delete $args{'schema'} or Carp::croak "Argument 'schema' is not specified.";
     my $num    = delete $args{'num_entries'} || 5;
+    my $hide   = delete $args{'hide_from_index'} || [];
+    Carp::croak "Argument 'hide_from_index' is not ARRAY reference." if ( ref $hide ne 'ARRAY' );
 
     my %config = %args;
     my $db = $schema->new( %config );
@@ -1045,10 +1047,12 @@ sub new {
 
     my $self = bless {
         db          => $db,
-        index       => {},
+        index       => [],
+        all         => [],
         filtered    => [],
         config      => {
             num_entries => $num,
+            hide        => $hide,
         },
         flag        => {
             indexed => 0,
@@ -1058,6 +1062,17 @@ sub new {
 }
 
 sub db { $_[0]->{'db'} }
+
+sub indexed_all {
+    my $self = shift;
+
+    if ( @_ ) {
+        $self->{'flag'}->{'indexed_all'} = shift @_;
+    }
+    else {
+        return $self->{'flag'}->{'indexed_all'};
+    }
+}
 
 sub indexed {
     my $self = shift;
@@ -1096,9 +1111,9 @@ sub filtered {
     }
 }
 
-sub index {
+sub all {
     my ( $self ) = @_;
-    return $self->{'index'} if ( $self->indexed );
+    return $self->{'all'} if ( $self->indexed_all );
 
     my @index = ();
     my %entries = $self->db->index();
@@ -1114,17 +1129,36 @@ sub index {
 
     @index = sort { $a->{'path'}->{'fullpath'} cmp $b->{'path'}->{'fullpath'} } @index;
 
-    $self->{'index'} = \@index;
+    $self->{'all'} = \@index;
+    $self->indexed_all(1);
+
+    return $self->{'all'};
+}
+
+sub index {
+    my ( $self ) = @_;
+    return $self->{'index'} if ( $self->indexed );
+
+    my $hide  = $self->{'config'}->{'hide'};
+    my @index = ();
+
+    for my $entry ( @{ $self->all } ) {
+        my $fullpath = $entry->{'path'}->{'fullpath'};
+        next if ( grep { $fullpath =~ $_ } @{ $hide } );
+        push @index, $entry;
+    }
+
+    $self->{'index'} = [ @index ];
     $self->indexed(1);
 
     return $self->{'index'};
 }
 
-sub reindex {
+sub reindex_all {
     my ( $self ) = @_;
 
-    $self->indexed(0);
-    return $self->index;
+    $self->indexed_all(0);
+    return $self->all;
 }
 
 sub exists {
@@ -1138,7 +1172,7 @@ sub entry {
     my ( $self, %args ) = @_;
     my $path = delete $args{'path'} or Carp::croak "Argument 'path' is not specified.";
 
-    if ( $self->exists( path => $path ) && ref( my $entry = ( grep { $_->{'path'}->{'fullpath'} eq $path } @{ $self->index } )[0] ) eq 'plasxom::entry' ) {
+    if ( $self->exists( path => $path ) && ref( my $entry = ( grep { $_->{'path'}->{'fullpath'} eq $path } @{ $self->all } )[0] ) eq 'plasxom::entry' ) {
         return $entry;
     }
     else {
@@ -1197,7 +1231,7 @@ sub filter {
     }
 
     # prepare
-    my $index   = $self->index;
+    my $index   = $self->all;
     my %new     = ();
 
     # filter path
