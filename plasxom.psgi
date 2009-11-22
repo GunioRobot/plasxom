@@ -1037,6 +1037,8 @@ sub new {
 
     my $schema = delete $args{'schema'} or Carp::croak "Argument 'schema' is not specified.";
     my $num    = delete $args{'num_entries'} || 5;
+    my $hide   = delete $args{'hide_from_index'} || [];
+    Carp::croak "Argument 'hide_form_index' is not ARRAY reference." if ( ref $hide ne 'ARRAY' );
 
     my %config = %args;
     my $db = $schema->new( %config );
@@ -1049,6 +1051,7 @@ sub new {
         filtered    => [],
         config      => {
             num_entries => $num,
+            hide        => $hide,
         },
         flag        => {
             indexed => 0,
@@ -1102,8 +1105,10 @@ sub index {
 
     my @index = ();
     my %entries = $self->db->index();
+    my $hide    = $self->{'config'}->{'hide'} || [];
 
     for my $path ( keys %entries ) {
+        next if ( grep { $path =~ $_ } @{ $hide } );
         my $entry = plasxom::entry->new(
             db      => $self->db,
             path    => $path,
@@ -1138,7 +1143,9 @@ sub entry {
     my ( $self, %args ) = @_;
     my $path = delete $args{'path'} or Carp::croak "Argument 'path' is not specified.";
 
-    if ( $self->exists( path => $path ) && ref( my $entry = ( grep { $_->{'path'}->{'fullpath'} eq $path } @{ $self->index } )[0] ) eq 'plasxom::entry' ) {
+    if ( $self->exists( path => $path ) ) {
+        my $entry = ( grep { $_->{'path'}->{'fullpath'} eq $path } @{ $self->index } )[0];
+           $entry = plasxom::entry->new( db => $self->db, path => $path, %{ { $self->db->index }->{$path} } ) if ( ! ref $entry ); # hide from index
         return $entry;
     }
     else {
