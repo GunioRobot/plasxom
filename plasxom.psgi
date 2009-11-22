@@ -1237,7 +1237,7 @@ sub filter {
     }
 
     # prepare
-    my $index   = $self->all;
+    my $index   = $self->index;
     my %new     = ();
 
     # filter path
