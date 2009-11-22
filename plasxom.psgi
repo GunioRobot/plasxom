@@ -624,6 +624,7 @@ sub dispatch {
 
     do {
         my $full = "${path}/${chunk}.${flavour}";
+           $full =~ s{^/+}{};
         if ( $source->exists( path => $full ) ) {
             return $self->load( $full );
         }
