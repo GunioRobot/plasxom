@@ -13,7 +13,6 @@ my $datadir = $example->subdir('core/entries/blosxom');
 
 my $entries = plasxom::entries->new(
     schema          => 'plasxom::entries::blosxom',
-    hide_from_index => [ qr{bar$} ],
     entries_dir     => $datadir,
     file_extension  => 'txt',
     depth           => 0,
@@ -30,6 +29,16 @@ my $index = [
         meta        => { foo => 'bar', bar => 'baz' },
         created => 1230735600,
         lastmod => stat( $datadir->file('foo.txt') )->mtime,
+    ),
+    plasxom::entry->new(
+        db => $entries->db,
+        path => 'foo/bar',
+        title   => 'title',
+        pagename    => 'foopage',
+        tags        => [qw( foo bar baz )],
+        meta        => { foo => 'bar', bar => 'baz' },
+        created => 1230735600,
+        lastmod => stat( $datadir->file('foo/bar.txt') )->mtime,
     ),
 ];
 
