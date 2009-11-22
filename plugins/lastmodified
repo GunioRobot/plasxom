@@ -38,7 +38,9 @@ sub entries {
        @names = do { my %t = (); grep { ! $t{$_}++ } @names };
 
     for my $chunk ( @names ) {
-        push @mtimes, $app->templates->dispatch( $flavour->path_info, $chunk, $flavour->flavour )->lastmod;
+        my $tmpl = $app->templates->dispatch( $flavour->path_info, $chunk, $flavour->flavour );
+           $tmpl->load;
+        push @mtimes, $tmpl->lastmod;
     }
 
     $self->{'mtime'} = ( sort { $b <=> $a } @mtimes )[0];
