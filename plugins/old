@@ -9,7 +9,7 @@ sub update {
     my ( $self, $app, $entries ) = @_;
     my $today   = time;
 
-    for my $entry ( @{ $entries->index } ) {
+    for my $entry ( @{ $entries->all } ) {
         my $stash   = $entry->stash;
         my $sec     = $today - $entry->date->epoch;
 

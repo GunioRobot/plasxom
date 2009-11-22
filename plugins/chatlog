@@ -8,7 +8,7 @@ use base qw( plasxom::plugin );
 sub update {
     my ( $self, $app, $entries ) = @_;
 
-    for my $entry ( @{ $entries->index } ) {
+    for my $entry ( @{ $entries->all } ) {
         $entry->register_formatter( $self, qw( format handle ) );
     }
 
