@@ -2569,7 +2569,7 @@ plasxom - Plack based blosxom clone
 
 =head1 AUTHOR
 
-Naoki Okamura (Nyarla) E<lt>thotep@nyarla.netE<gt>
+Naoki Okamura (Nyarla) E<lt>nyarla[:)]thotep.netE<gt>
 
 =head1 SEE ALSO
 
@@ -2577,7 +2577,7 @@ L<Plack>, L<PSGI>
 
 =head1 LICENSE
 
-Copyright (c) 2009 Naoki Okamura (Nyarla) E<lt>thotep@nyarla.netE<gt>
+Copyright (c) 2009 Naoki Okamura (Nyarla) E<lt>nyarla[:)]thotep.netE<gt>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
