@@ -792,6 +792,11 @@ sub compile {
     };
 }
 
+sub raw ($) {
+    my ( $str ) = shift;
+    return Text::MicroTemplate::EncodedString->new($str);
+}
+
 1;
 
 package plasxom::cache;
