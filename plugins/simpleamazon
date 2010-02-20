@@ -27,6 +27,9 @@ sub init {
     my $secret = $self->config->{'secret'} or Carp::croak "APAAPI Secret key is not set.";
     $self->{'secret'} = $secret;
 
+    my $asoid  = $self->config->{'asoid'};
+    $self->{'asoid'} = $asoid if ( defined $asoid );
+
     return 1;
 }
 
@@ -61,6 +64,7 @@ sub asin {
     my $locale = $self->{'locale'};
     my $apikey = $self->{'apikey'};
     my $secret = $self->{'secret'};
+    my $asoid  = $self->{'asoid'};
 
     # gen Timestamp
     my ( $sec, $min, $hr, $da, $mo, $yr ) = gmtime();
@@ -77,6 +81,8 @@ sub asin {
         Version         => '2009-02-01',
         Timestamp       => $time,
     );
+
+    $param{'AssociateTag'} = $asoid if ( defined $asoid );
 
     my $uri = URI::Amazon::APA->new( $base{$locale} );
        $uri->query_form( %param );
