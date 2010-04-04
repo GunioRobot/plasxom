@@ -4,7 +4,7 @@ use strict;
 use warnings;
 
 use t::Util qw( require_plasxom $example );
-use Test::More tests => 1 + 1 + 7 + 2 + 2 + 2 + 3;
+use Test::More tests => 1 + 1 +  1 + 7 + 2 + 2 + 2 + 3;
 
 require_plasxom;
 
@@ -30,6 +30,12 @@ $BBB->stash->{'foo'} = 'barbaz';
 is_deeply(
     [ $entries->filter( path => 'foo/' ) ],
     [ ( sort { $b->created <=> $a->created } ( $BBB, $CCC ) ) ],
+);
+
+# filter filename
+is_deeply(
+    [ $entries->filter( filename => 'BBB' ) ],
+    [ $BBB ],
 );
 
 # filter pagename

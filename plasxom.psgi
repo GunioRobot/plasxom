@@ -288,11 +288,13 @@ sub prepare_entries {
     }
 
     # path, filename
-    my $path = $flavour->path;
-       $path = q{}        if ( ! defined $path );
-       $path = "${path}/" if ( $path ne q{} );
-       $path .= $flavour->filename if ( defined $flavour->filename && $flavour->filename ne q{} );
-    $args{'path'} = $path;
+    my $path            = $flavour->path;
+       $path            = q{} if ( ! defined $path );
+    $args{'path'}       = $path if ( $path ne q{} );
+
+    my $filename        = $flavour->filename;
+       $filename        = q{} if ( ! defined $filename );
+    $args{'filename'}   = $filename if ( $filename ne q{} );
 
     # meta
     if ( scalar(keys %{ $flavour->meta || {} }) ) {
@@ -1198,10 +1200,12 @@ sub entry {
 sub filter {
     my ( $self, %args ) = @_;
 
-    my $path = delete $args{'path'};
-       $path = q{} if ( ! defined $path );
-    my $page = delete $args{'pagename'};
-       $page = q{} if ( ! defined $page );
+    my $path        = delete $args{'path'};
+       $path        = q{} if ( ! defined $path );
+    my $filename    = delete $args{'filename'};
+       $filename    = q{} if ( ! defined $filename );
+    my $page        = delete $args{'pagename'};
+       $page        = q{} if ( ! defined $page );
 
     my %datetime;
     for my $prop ( qw( year month day hour minute second ) ) {
@@ -1254,6 +1258,15 @@ sub filter {
         my $fn = $entry->{'path'}->{'fullpath'};
         if ( $fn =~ m{^$path} ) {
             $new{$fn} = $entry;
+        }
+    }
+
+    # filter filename
+    $filename =~ s{/}{}g;
+    $filename = quotemeta($filename);
+    for my $fn ( keys %new ) {
+        if ( $new{$fn}->{'path'}->{'filename'} !~ m{$filename} ) {
+            delete $new{$fn};
         }
     }
 

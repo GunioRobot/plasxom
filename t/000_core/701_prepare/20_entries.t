@@ -35,7 +35,8 @@ our $entries = plasxom::entries->new(
                 day => 20,
                 flavour => 'html',
                 pagename => 'foo',
-                path => 'foo/bar',
+                path => 'foo',
+                filename => 'bar',
                 meta => {
                     key => "(?-xism:value)",
                 },
