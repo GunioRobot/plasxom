@@ -11,13 +11,13 @@ require_plasxom;
 
 {
     package plugins;
-    
+
     sub new { bless {}, shift }
-    
+
     sub run_plugins {
         our ( $self, $method, @args ) = @_;
         package main;
-        
+
         is( $plugins::method, 'flavour' );
         is( scalar( @plugins::args ), 1 );
 

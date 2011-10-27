@@ -10,7 +10,7 @@ require_plasxom;
 
 {
     package Plugins;
-    
+
     sub new { bless {}, shift };
     sub prepare {
         package main;

@@ -8,7 +8,7 @@ use File::stat;
 use File::Temp;
 use Test::Warn;
 use Test::More
-    tests => 1 + 3 + 2 + 2 + 1 + 1 + 1 
+    tests => 1 + 3 + 2 + 2 + 1 + 1 + 1
            + 2 + 3 + 2 + 7
            + 1 + 2 + 1 + 1 + 2 + 1
            + 1;

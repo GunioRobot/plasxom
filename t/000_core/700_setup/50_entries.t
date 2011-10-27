@@ -10,13 +10,13 @@ require_plasxom;
 
 {
     package plugins;
-    
+
     sub new { bless {}, shift }
-    
+
     sub run_plugins {
         our ( $self, $method, $arg ) = @_;
         package main;
-        
+
         is( $plugins::method, 'filter' );
         isa_ok( $plugins::arg, 'plasxom::entries' );
     }

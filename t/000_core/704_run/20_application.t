@@ -10,20 +10,20 @@ BEGIN { require_plasxom };
 
 {
     package plasxom;
-    
+
     no strict 'refs';
     no warnings 'redefine';
-    
+
     *{'setup'} = sub {
         package main;
-        
+
         ok(1);
     };
 
     package test_middleware;
 
     use base qw( Plack::Middleware );
-    
+
     sub call {
         my ( $self, $env ) = @_;
         return $self->app;
@@ -38,7 +38,7 @@ BEGIN { require_plasxom };
         is_deeply( [ @test_middleware::args ], [qw( foo  )] );
 
         package test_middleware;
-        
+
         $mw->SUPER::wrap( @_ );
     }
 

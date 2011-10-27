@@ -41,7 +41,7 @@ plan tests =>
 
 {
     package TestLoader;
-    
+
     sub select {
         our ( $class, %args ) = @_;
 
@@ -49,7 +49,7 @@ plan tests =>
         is( $TestLoader::args{'path'}, '/path/to/entry' );
         return %entry;
     }
-    
+
     sub exists {
         our ( $class, %args ) = @_;
 
@@ -57,7 +57,7 @@ plan tests =>
         is( $TestLoader::args{'path'}, '/path/to/entry' );
         return 1;
     }
-    
+
     sub create_or_update {
         our ( $class, %args ) = @_;
 
@@ -77,7 +77,7 @@ plan tests =>
     sub remove {
         our ( $class, %args ) = @_;
         package main;
-        
+
         is( $TestLoader::args{'path'}, '/path/to/entry' );
     }
 
@@ -89,7 +89,7 @@ plan tests =>
         our ( $class, $entry ) = @_;
 
         package main;
-        
+
         isa_ok( $TestFormatter::entry, 'plasxom::entry' );
 
         return 1;
@@ -98,7 +98,7 @@ plan tests =>
     sub format {
         our ( $class, $entry ) = @_;
         package main;
-        
+
         isa_ok( $TestFormatter::entry, 'plasxom::entry' );
         return 'foobarbaz';
     }

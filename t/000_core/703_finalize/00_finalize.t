@@ -10,13 +10,13 @@ require_plasxom;
 
 {
     package plugins;
-    
+
     sub new { bless {}, shift }
-    
+
     sub run_plugins {
         our ( $self, $method ) = @_;
         package main;
-        
+
         is( $plugins::method, 'end' );
     }
 }

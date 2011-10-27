@@ -10,10 +10,10 @@ BEGIN { require_plasxom };
 
 {
     package plasxom::plugin;
-    
+
     no strict 'refs';
     no warnings 'redefine';
-    
+
     *{'init'} = sub { package main; ok(1) };
 }
 

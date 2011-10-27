@@ -10,12 +10,12 @@ require_plasxom;
 
 {
     package TestCacheClassA;
-    
+
     sub new {
         our ( $class, $args ) = @_;
         our $self = bless {  }, $class;
         package main;
-        
+
         is_deeply(
             $TestCacheClassA::args,
             {
@@ -24,7 +24,7 @@ require_plasxom;
         );
         return $TestCacheClassA::self;
     }
-    
+
     sub set {
         our ( $self, $key, $value ) = @_;
         $self->{$key} = $value;
@@ -32,7 +32,7 @@ require_plasxom;
         is( $TestCacheClassA::key, 'foo' );
         is( $TestCacheClassA::value, 'bar' );
     }
-    
+
     sub get {
         our ( $self, $key ) = @_;
         package main;
@@ -47,7 +47,7 @@ require_plasxom;
     sub new {
         our ( $class, %args ) = @_;
         package main;
-        
+
         is_deeply(
             \%TestCacheClassB::args,
             {

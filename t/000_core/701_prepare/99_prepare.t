@@ -10,7 +10,7 @@ BEGIN { require_plasxom }
 
 {
     package plasxom;
-    
+
     no strict 'refs';
     no warnings 'redefine';
     for my $phase (qw( plugins flavour entries )) {

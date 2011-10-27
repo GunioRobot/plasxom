@@ -25,7 +25,7 @@ BEGIN { require_plasxom; }
     };
 
     package plugins;
-    
+
     sub new { bless {}, shift }
     sub context {
         our ( $self, $context ) = @_;

@@ -10,7 +10,7 @@ require_plasxom;
 
 {
     package TestEntries;
-    
+
     sub new {
         my ( $class, %args ) = @_;
         return bless { %args }, $class;

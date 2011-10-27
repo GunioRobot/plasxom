@@ -35,7 +35,7 @@ for my $property ( qw( config plugins templates vars cache entries entries_schem
     no strict 'refs';
     *{$property} = sub {
         my $class = shift;
-        if ( @_ ) { 
+        if ( @_ ) {
             $stash{$property} = shift @_;
         }
         else {
@@ -1291,7 +1291,7 @@ sub filter {
                 }
             }
         }
-    
+
     }
 
     # filter meta and stash
@@ -2558,11 +2558,11 @@ plasxom - Plack based blosxom clone
 
 =head1 SYNPOSIS
 
-    
+
     ## work dir
     $ mkdir work
     $ cd work
-    
+
     ## setup plasxom
     $ git clone git://github.com/nyarla/plasxom.git plasxom
     $ cd plasxom

@@ -20,7 +20,7 @@ our $entries = plasxom::entries->new(
 
 {
     package plasxom::entries;
-    
+
     no strict 'refs';
     no warnings 'redefine';
 
@@ -60,7 +60,7 @@ our $entries = plasxom::entries->new(
         is( $plasxom::entries::args{'page'}, 1 );
 
         package plasxom::entries;
-        
+
         return $self->filter( %args );
     };
 
@@ -106,7 +106,7 @@ my $app = plasxom->new;
         tag_op => 'OR',
    ) );
    $app->prepare_entries;
-   
+
    $app->flavour->page('all');
    $app->prepare_entries;
 

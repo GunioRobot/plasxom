@@ -10,14 +10,14 @@ BEGIN { require_plasxom };
 
 {
     package TestEntries;
-    
+
     use base qw( plasxom::entries::base );
 
     sub init {
         our ( $self, %args ) = @_;
 
         package main;
-        
+
         is_deeply(
             \%TestEntries::args,
             {
@@ -57,7 +57,7 @@ our $flag = 0;
             our ( $self, %args ) = @_;
 
             package main;
-            
+
             my $entry = { %main::entry };
                $entry->{'path'} = "/path/to/${method}.txt";
 
@@ -67,7 +67,7 @@ our $flag = 0;
             );
         };
     }
-    
+
     sub exists {
         our ( $self, %args ) = @_;
 
